@@ -6,3 +6,5 @@ simulation/modelsim/rtl_work
 *.xrf
 *.sft
 *.vo
+*.do.bak*
+*.wlf

@@ -1,4 +1,4 @@
-module irom(
+module iram(
     input HCLK,
     input HRESET,
     input [16:0] HADDR,

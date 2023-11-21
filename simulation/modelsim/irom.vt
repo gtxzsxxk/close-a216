@@ -56,7 +56,6 @@ begin
 // code that executes only once                        
 // insert code here --> begin                          
 HADDR = 0;
-HRDATA = 0;
 HRESET = 1;
 HTRANS = 0;
 HWDATA = 0;
@@ -74,6 +73,10 @@ HWDATA = 21;
 HADDR = 3;
 HWRITE = 0;
 HWDATA = 21;
+#1 HCLK = 1;
+#1 HCLK = 0;
+#1 HCLK = 1;
+#1 HCLK = 0;
 #1 HCLK = 1;
 #1 HCLK = 0;
 

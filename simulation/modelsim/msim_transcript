@@ -12,18 +12,38 @@
 # 
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/irom.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 15:53:53 on Nov 21,2023
+# Start time: 16:06:10 on Nov 21,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/irom.v 
 # -- Compiling module irom
-# ** Error: D:/fpga/a216/rtl/irom.v(14): Single value range allowed only in SystemVerilog.
-# ** Error: (vlog-13027) D:/fpga/a216/rtl/irom.v(18): near "i": Syntax error. 'for' loop variable declaration only allowed in SystemVerilog.
-# ** Error: D:/fpga/a216/rtl/irom.v(18): (vlog-2730) Undefined variable: 'i'.
-# ** Error: (vlog-13069) D:/fpga/a216/rtl/irom.v(18): near ")": syntax error, unexpected ')', expecting ';'.
-# ** Error: (vlog-13069) D:/fpga/a216/rtl/irom.v(22): near "else": syntax error, unexpected else.
-# End time: 15:53:53 on Nov 21,2023, Elapsed time: 0:00:00
-# Errors: 5, Warnings: 0
-# ** Error: D:/intelFPGA_lite/19.1/modelsim_ase/win32aloem/vlog failed.
-# Error in macro ./a216_run_msim_rtl_verilog.do line 8
-# D:/intelFPGA_lite/19.1/modelsim_ase/win32aloem/vlog failed.
-#     while executing
-# "vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/irom.v}"
+# 
+# Top level modules:
+# 	irom
+# End time: 16:06:10 on Nov 21,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# vlog -vlog01compat -work work +incdir+D:/fpga/a216/simulation/modelsim {D:/fpga/a216/simulation/modelsim/irom.vt}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 16:06:10 on Nov 21,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/simulation/modelsim" D:/fpga/a216/simulation/modelsim/irom.vt 
+# -- Compiling module irom_vlg_tst
+# 
+# Top level modules:
+# 	irom_vlg_tst
+# End time: 16:06:10 on Nov 21,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs="+acc"  irom_vlg_tst
+# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs=""+acc"" irom_vlg_tst 
+# Start time: 16:06:10 on Nov 21,2023
+# Loading work.irom_vlg_tst
+# Loading work.irom
+# 
+# add wave *
+# view structure
+# .main_pane.structure.interior.cs.body.struct
+# view signals
+# .main_pane.objects.interior.cs.body.tree
+# run -all
+# Running testbench
+# End time: 16:07:34 on Nov 21,2023, Elapsed time: 0:01:24
+# Errors: 0, Warnings: 0
