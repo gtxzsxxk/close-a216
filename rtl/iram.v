@@ -1,15 +1,15 @@
 module iram(
     input HCLK,
     input HRESET,
-    input [16:0] HADDR,
+    input [63:0] HADDR,
     input [1:0] HTRANS,
-    input [16:0] HWDATA,
+    input [63:0] HWDATA,
     input HWRITE,
-    output reg [16:0] HRDATA
+    output reg [63:0] HRDATA
 );
 
 parameter ROM_SIZE = 256;
-parameter ROM_START = 64'h0;
+parameter ROM_START = 64'hff;
 
 reg [7:0] rom[ROM_SIZE-1:0];
 

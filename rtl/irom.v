@@ -1,11 +1,11 @@
 module irom(
     input HCLK,
     input HRESET,
-    input [16:0] HADDR,
+    input [63:0] HADDR,
     input [1:0] HTRANS,
-    input [16:0] HWDATA,
+    input [63:0] HWDATA,
     input HWRITE,
-    output reg [16:0] HRDATA
+    output reg [63:0] HRDATA
 );
 
 parameter ROM_SIZE = 256;
