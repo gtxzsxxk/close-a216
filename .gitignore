@@ -1,0 +1,8 @@
+db
+incremental_db
+output_files
+*.bak
+simulation/modelsim/rtl_work
+*.xrf
+*.sft
+*.vo
