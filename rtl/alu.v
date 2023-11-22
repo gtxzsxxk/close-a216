@@ -33,7 +33,21 @@ always @ (posedge CLK) begin
     end
     else if(funct3 == 3'b010) begin
     /* SLT */
-        res <= op1 << shift;
+        if($signed(op1) < $signed(op2)) begin
+            res <= 1;
+        end
+        else begin
+            res <= 0;
+        end
+    end
+    else if(funct3 == 3'b011) begin
+    /* SLTU */
+        if($unsigned(op1) < $unsigned(op2)) begin
+            res <= 1;
+        end
+        else begin
+            res <= 0;
+        end
     end
 
 end
