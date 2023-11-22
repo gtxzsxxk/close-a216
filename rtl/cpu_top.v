@@ -48,10 +48,19 @@ irom internal_rom(
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
-    .HRDATA(PDATA),
+    .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
     .HTRANS(HTRANS_1)
+);
+
+wire [4:0] rd;
+wire [4:0] rs1;
+
+inst_decode i_d(
+    .CLK(CLK),
+    .inst(inst),
+
 );
 
 always @ (posedge CLK or negedge RESET) begin

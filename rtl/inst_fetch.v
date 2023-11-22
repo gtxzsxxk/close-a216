@@ -12,6 +12,8 @@ reg [63:0] PC;
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
         PC <= 64'b0;
+        HADDR <= 64'b0;
+        HTRANS <= 1;
     end
     else begin
         inst <= HRDATA;

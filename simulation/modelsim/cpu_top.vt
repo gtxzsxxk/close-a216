@@ -64,6 +64,14 @@ begin
 #1 CLK = 0;
 #1 CLK = 1;
 #1 CLK = 0;
+#1 CLK = 1;
+#1 CLK = 0;
+#1 CLK = 1;
+#1 CLK = 0;
+#1 CLK = 1;
+#1 CLK = 0;
+#1 CLK = 1;
+#1 CLK = 0;
 // --> end                                             
 $display("Running testbench");                       
 end                                                    

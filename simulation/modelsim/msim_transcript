@@ -12,59 +12,59 @@
 # 
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/irom.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/irom.v 
 # -- Compiling module irom
 # 
 # Top level modules:
 # 	irom
-# End time: 21:22:16 on Nov 22,2023, Elapsed time: 0:00:00
+# End time: 21:42:50 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/cpu_top.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/cpu_top.v 
 # -- Compiling module cpu_top
 # 
 # Top level modules:
 # 	cpu_top
-# End time: 21:22:16 on Nov 22,2023, Elapsed time: 0:00:00
+# End time: 21:42:50 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/inst_fetch.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/inst_fetch.v 
 # -- Compiling module inst_fetch
 # 
 # Top level modules:
 # 	inst_fetch
-# End time: 21:22:16 on Nov 22,2023, Elapsed time: 0:00:00
+# End time: 21:42:50 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/mem_controller.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/mem_controller.v 
 # -- Compiling module mem_controller
 # 
 # Top level modules:
 # 	mem_controller
-# End time: 21:22:16 on Nov 22,2023, Elapsed time: 0:00:00
+# End time: 21:42:50 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # 
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/simulation/modelsim {D:/fpga/a216/simulation/modelsim/cpu_top.vt}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/simulation/modelsim" D:/fpga/a216/simulation/modelsim/cpu_top.vt 
 # -- Compiling module cpu_top_vlg_tst
 # 
 # Top level modules:
 # 	cpu_top_vlg_tst
-# End time: 21:22:16 on Nov 22,2023, Elapsed time: 0:00:00
+# End time: 21:42:50 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # 
 # vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs="+acc"  cpu_top_vlg_tst
 # vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs=""+acc"" cpu_top_vlg_tst 
-# Start time: 21:22:16 on Nov 22,2023
+# Start time: 21:42:50 on Nov 22,2023
 # Loading work.cpu_top_vlg_tst
 # Loading work.cpu_top
 # Loading work.mem_controller
@@ -80,15 +80,6 @@
 # Running testbench
 add wave -position insertpoint  \
 sim:/cpu_top_vlg_tst/i1/i_f/inst
-restart
-run -all
-# Running testbench
-add wave -position insertpoint  \
-sim:/cpu_top_vlg_tst/i1/internal_rom/HWRITE
-add wave -position insertpoint  \
-sim:/cpu_top_vlg_tst/i1/internal_rom/HADDR
-add wave -position insertpoint  \
-sim:/cpu_top_vlg_tst/i1/internal_rom/HRDATA
 restart
 run -all
 # Running testbench
