@@ -1,6 +1,6 @@
 module inst_decode(
     input CLK,
-    input [63:0] inst,
+    input [31:0] inst,
     output reg [4:0] rd,
     output reg [4:0] rs1,
     output reg [4:0] rs2,
@@ -36,7 +36,7 @@ always @ (posedge CLK) begin
         rs1 <= inst[19:15];
         imm20 <= inst[31:20];
         op1 <= registers[inst[19:15]];
-        op2 <= {{(52)inst[31]},inst[31:20]};
+        op2 <= {{(52){inst[31]}},inst[31:20]};
         mem_acc <= 0;
     end
     else if(inst[6:0] == LOAD) begin
@@ -45,7 +45,7 @@ always @ (posedge CLK) begin
         rs1 <= inst[19:15];
         imm20 <= inst[31:20];
         op1 <= registers[inst[19:15]];
-        op2 <= {{(52)inst[31]},inst[31:20]};
+        op2 <= {{(52){inst[31]}},inst[31:20]};
         mem_acc <= 1;
     end
 end

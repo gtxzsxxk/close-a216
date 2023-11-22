@@ -13,10 +13,6 @@ module mem_controller(
     output reg stall
 );
 
-always @ (negedge HRESET) begin
-    stall <= 0;
-end
-
 always @ (*) begin
     if(HTRANS_1 && HTRANS_2) begin
         PADDR <= HADDR_1;

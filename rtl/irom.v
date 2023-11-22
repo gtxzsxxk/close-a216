@@ -18,7 +18,7 @@ integer rst_i;
 always @(posedge HCLK or negedge HRESET) begin
     if (HRESET==0) begin
         for(rst_i=0;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
-            rom[rst_i] <= 8'b0;
+            rom[rst_i] <= rst_i;
         end
     end
     else begin

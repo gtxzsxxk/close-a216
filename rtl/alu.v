@@ -4,7 +4,7 @@ module alu(
     input [63:0] op1,
     input [63:0] op2,
     input [2:0] funct3,
-    input [6:0] funct7
+    input [6:0] funct7,
     output reg [63:0] res
 );
 

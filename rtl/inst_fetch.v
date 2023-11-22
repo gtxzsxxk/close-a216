@@ -3,7 +3,7 @@ module inst_fetch(
     input reset,
     input [63:0] HRDATA,
     output reg [63:0] HADDR,
-    output reg [63:0] inst
+    output reg [31:0] inst
 );
 
 reg [63:0] PC;
