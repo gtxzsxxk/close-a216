@@ -49,6 +49,20 @@ always @ (posedge CLK) begin
             res <= 0;
         end
     end
+    else if(funct3 == 3'b100) begin
+    /* XOR */
+        res <= op1 ^ op2;
+    end
+    else if(funct3 == 3'b101) begin
+        if(funct7 == 7'b0100000) begin
+            /* SRA */
+            res <= $signed(op1) >>> shift;
+        end
+        else begin
+            /* SRL */
+            res <= op1 >> shift;
+        end
+    end
 
 end
 
