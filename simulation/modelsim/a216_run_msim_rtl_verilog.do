@@ -12,6 +12,7 @@ vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/inst_de
 vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/alu.v}
 vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/mem_controller.v}
 vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/mem_access.v}
+vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/write_back.v}
 
 vlog -vlog01compat -work work +incdir+D:/fpga/a216/simulation/modelsim {D:/fpga/a216/simulation/modelsim/cpu_top.vt}
 

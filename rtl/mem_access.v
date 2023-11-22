@@ -29,6 +29,7 @@ always @ (posedge CLK) begin
     end 
     else begin
         res <= alu_res;
+        HTRANS <= 0;
     end
     rd_o <= rd_i;
 end
