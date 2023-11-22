@@ -63,6 +63,12 @@ always @ (posedge CLK) begin
             res <= op1 >> shift;
         end
     end
+    else if(funct3 == 3'b110) begin
+        res <= op1 | op2;
+    end
+    else if(funct3 == 3'b111) begin
+        res <= op1 & op2;
+    end
 
 end
 
