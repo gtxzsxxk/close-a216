@@ -14,6 +14,7 @@ module inst_decode(
 
 parameter ALGORITHM = 7'b0110011;
 parameter ALGORITHM_IMM = 7'0010011;
+parameter 
 
 reg [63:0] registers[31:0];
 
