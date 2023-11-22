@@ -135,7 +135,6 @@ mem_access m_a(
 );
 
 write_back w_b(
-    .CLK(CLK),
     .EN(mem_write_back_en),
     .rd(mem_rd),
     .value(mem_res),

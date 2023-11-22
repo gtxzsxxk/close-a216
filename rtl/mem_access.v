@@ -32,6 +32,7 @@ always @ (posedge CLK) begin
         HTRANS <= 0;
     end
     rd_o <= rd_i;
+    mem_write_back_en <= write_back;
 end
 
 endmodule
