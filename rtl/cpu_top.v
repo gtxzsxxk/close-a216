@@ -5,18 +5,20 @@ module cpu_top(
 
 
 wire HTRANS_1;
-wire HTRANS_2;
+wire HTRANS_2 = 0;
 wire [63:0] HADDR_1;
 wire [63:0] HADDR_2;
-wire HWRITE_1;
-wire HWRITE_2;
+wire HWRITE_1 = 0;
+wire HWRITE_2 = 0;
 wire [63:0] HWDATA_1;
 wire [63:0] HWDATA_2;
-wire PADDR;
+wire [63:0] PADDR;
 wire HWRITE;
 wire [63:0] PDATA;
 wire [63:0] HRDATA;
 wire stall;
+
+wire c_zero = 0;
 
 reg if_reset = 1;
 wire [31:0] inst;
@@ -39,7 +41,8 @@ mem_controller mc(
 irom internal_rom(
     .HADDR(PADDR),
     .HWDATA(PDATA),
-    .HRDATA(HRDATA)
+    .HRDATA(HRDATA),
+    .HWRITE(c_zero)
 );
 
 inst_fetch i_f(
@@ -47,7 +50,8 @@ inst_fetch i_f(
     .reset(if_reset),
     .HRDATA(PDATA),
     .HADDR(HADDR_1),
-    .inst(inst)
+    .inst(inst),
+    .HTRANS(HTRANS_1)
 );
 
 always @ (posedge CLK or negedge RESET) begin

@@ -1,8 +1,8 @@
 module irom(
     input [63:0] HADDR,
-    input [31:0] HWDATA,
+    input [63:0] HWDATA,
     input HWRITE,
-    output reg [31:0] HRDATA
+    output reg [63:0] HRDATA
 );
 
 parameter ROM_SIZE = 256;
@@ -24,7 +24,7 @@ always @(*) begin
             rom[HADDR-ROM_START + 3] <= HWDATA[31:24];
         end
         else begin
-            HRDATA <= {
+            HRDATA <= {32'd0,
                 rom[HADDR-ROM_START + 3],
                 rom[HADDR-ROM_START + 2],
                 rom[HADDR-ROM_START + 1],
