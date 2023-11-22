@@ -1,5 +1,6 @@
 module cpu_top(
-    input CLK
+    input CLK,
+    input RESET
 );
 
 
@@ -14,9 +15,10 @@ wire [63:0] HWDATA_2;
 wire PADDR;
 wire HWRITE;
 wire [63:0] PDATA;
+wire [63:0] HRDATA;
 wire stall;
 
-reg if_reset;
+reg if_reset = 1;
 wire [31:0] inst;
 
 mem_controller mc(
@@ -34,6 +36,12 @@ mem_controller mc(
     .stall(stall)
 );
 
+irom internal_rom(
+    .HADDR(PADDR),
+    .HWDATA(PDATA),
+    .HRDATA(HRDATA)
+);
+
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
@@ -41,5 +49,14 @@ inst_fetch i_f(
     .HADDR(HADDR_1),
     .inst(inst)
 );
+
+always @ (posedge CLK or negedge RESET) begin
+    if(!RESET) begin
+        if_reset <= 0;
+    end
+    else begin
+        if_reset <= 1;
+    end
+end
 
 endmodule

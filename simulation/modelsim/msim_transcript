@@ -12,31 +12,71 @@
 # 
 # vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/irom.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 16:06:10 on Nov 21,2023
+# Start time: 20:51:12 on Nov 22,2023
 # vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/irom.v 
 # -- Compiling module irom
 # 
 # Top level modules:
 # 	irom
-# End time: 16:06:10 on Nov 21,2023, Elapsed time: 0:00:00
+# End time: 20:51:12 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
-# 
-# vlog -vlog01compat -work work +incdir+D:/fpga/a216/simulation/modelsim {D:/fpga/a216/simulation/modelsim/irom.vt}
+# vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/cpu_top.v}
 # Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
-# Start time: 16:06:10 on Nov 21,2023
-# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/simulation/modelsim" D:/fpga/a216/simulation/modelsim/irom.vt 
-# -- Compiling module irom_vlg_tst
+# Start time: 20:51:12 on Nov 22,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/cpu_top.v 
+# -- Compiling module cpu_top
 # 
 # Top level modules:
-# 	irom_vlg_tst
-# End time: 16:06:10 on Nov 21,2023, Elapsed time: 0:00:00
+# 	cpu_top
+# End time: 20:51:12 on Nov 22,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/inst_fetch.v}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 20:51:12 on Nov 22,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/inst_fetch.v 
+# -- Compiling module inst_fetch
+# 
+# Top level modules:
+# 	inst_fetch
+# End time: 20:51:12 on Nov 22,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -vlog01compat -work work +incdir+D:/fpga/a216/rtl {D:/fpga/a216/rtl/mem_controller.v}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 20:51:12 on Nov 22,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/rtl" D:/fpga/a216/rtl/mem_controller.v 
+# -- Compiling module mem_controller
+# 
+# Top level modules:
+# 	mem_controller
+# End time: 20:51:12 on Nov 22,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # 
-# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs="+acc"  irom_vlg_tst
-# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs=""+acc"" irom_vlg_tst 
-# Start time: 16:06:10 on Nov 21,2023
-# Loading work.irom_vlg_tst
+# vlog -vlog01compat -work work +incdir+D:/fpga/a216/simulation/modelsim {D:/fpga/a216/simulation/modelsim/cpu_top.vt}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 20:51:12 on Nov 22,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+D:/fpga/a216/simulation/modelsim" D:/fpga/a216/simulation/modelsim/cpu_top.vt 
+# -- Compiling module cpu_top_vlg_tst
+# 
+# Top level modules:
+# 	cpu_top_vlg_tst
+# End time: 20:51:12 on Nov 22,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs="+acc"  cpu_top_vlg_tst
+# vsim -t 1ps -L altera_ver -L lpm_ver -L sgate_ver -L altera_mf_ver -L altera_lnsim_ver -L cycloneive_ver -L rtl_work -L work -voptargs=""+acc"" cpu_top_vlg_tst 
+# Start time: 20:51:12 on Nov 22,2023
+# Loading work.cpu_top_vlg_tst
+# Loading work.cpu_top
+# Loading work.mem_controller
 # Loading work.irom
+# Loading work.inst_fetch
+# ** Warning: (vsim-3015) D:/fpga/a216/rtl/cpu_top.v(24): [PCDPC] - Port size (64) does not match connection size (1) for port 'PADDR'. The port definition is at: D:/fpga/a216/rtl/mem_controller.v(10).
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/mc File: D:/fpga/a216/rtl/mem_controller.v
+# ** Warning: (vsim-3017) D:/fpga/a216/rtl/cpu_top.v(39): [TFMPC] - Too few port connections. Expected 4, found 3.
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/internal_rom File: D:/fpga/a216/rtl/irom.v
+# ** Warning: (vsim-3015) D:/fpga/a216/rtl/cpu_top.v(39): [PCDPC] - Port size (64) does not match connection size (1) for port 'HADDR'. The port definition is at: D:/fpga/a216/rtl/irom.v(2).
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/internal_rom File: D:/fpga/a216/rtl/irom.v
+# ** Warning: (vsim-3722) D:/fpga/a216/rtl/cpu_top.v(39): [TFMPC] - Missing connection for port 'HWRITE'.
 # 
 # add wave *
 # view structure
@@ -45,5 +85,17 @@
 # .main_pane.objects.interior.cs.body.tree
 # run -all
 # Running testbench
-# End time: 16:07:34 on Nov 21,2023, Elapsed time: 0:01:24
-# Errors: 0, Warnings: 0
+add wave -position insertpoint  \
+sim:/cpu_top_vlg_tst/i1/i_f/inst
+add wave -position insertpoint  \
+sim:/cpu_top_vlg_tst/i1/mc/HADDR_1
+restart
+# ** Warning: (vsim-3015) D:/fpga/a216/rtl/cpu_top.v(24): [PCDPC] - Port size (64) does not match connection size (1) for port 'PADDR'. The port definition is at: D:/fpga/a216/rtl/mem_controller.v(10).
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/mc File: D:/fpga/a216/rtl/mem_controller.v
+# ** Warning: (vsim-3017) D:/fpga/a216/rtl/cpu_top.v(39): [TFMPC] - Too few port connections. Expected 4, found 3.
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/internal_rom File: D:/fpga/a216/rtl/irom.v
+# ** Warning: (vsim-3015) D:/fpga/a216/rtl/cpu_top.v(39): [PCDPC] - Port size (64) does not match connection size (1) for port 'HADDR'. The port definition is at: D:/fpga/a216/rtl/irom.v(2).
+#    Time: 0 ps  Iteration: 0  Instance: /cpu_top_vlg_tst/i1/internal_rom File: D:/fpga/a216/rtl/irom.v
+# ** Warning: (vsim-3722) D:/fpga/a216/rtl/cpu_top.v(39): [TFMPC] - Missing connection for port 'HWRITE'.
+run -all
+# Running testbench
