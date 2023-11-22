@@ -1,11 +1,15 @@
 module alu(
     input CLK,
     input imm,
+    input [4:0] rd_i,
     input [63:0] op1,
     input [63:0] op2,
     input [2:0] funct3,
     input [6:0] funct7,
-    output reg [63:0] res
+    input write_back,
+    output reg [63:0] res,
+    output reg alu_write_back_en,
+    output reg [4:0] rd_o
 );
 
 wire [5:0] shift;
@@ -69,7 +73,8 @@ always @ (posedge CLK) begin
     else if(funct3 == 3'b111) begin
         res <= op1 & op2;
     end
-
+    alu_write_back_en <= write_back;
+    rd_o <= rd_i;
 end
 
 endmodule

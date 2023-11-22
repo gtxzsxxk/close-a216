@@ -78,4 +78,6 @@ set_global_assignment -name EDA_TEST_BENCH_NAME cpu_top_vlg_tst -section_id eda_
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id cpu_top_vlg_tst
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME cpu_top_vlg_tst -section_id cpu_top_vlg_tst
 set_global_assignment -name EDA_TEST_BENCH_FILE simulation/modelsim/cpu_top.vt -section_id cpu_top_vlg_tst
+set_global_assignment -name VERILOG_FILE rtl/mem_access.v
+set_global_assignment -name VERILOG_FILE rtl/write_back.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

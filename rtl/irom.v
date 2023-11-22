@@ -13,9 +13,13 @@ reg [7:0] rom[ROM_SIZE-1:0];
 integer rst_i;
 
 always @(*) begin
-    for(rst_i=0;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
+    for(rst_i=4;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
         rom[rst_i] <= rst_i;
     end
+    rom[3] = 8'h00;
+    rom[2] = 8'h40;
+    rom[1] = 8'h00;
+    rom[0] = 8'h93;
     if(HADDR >= ROM_START && HADDR < (ROM_START + ROM_SIZE - 4)) begin
         if(HWRITE) begin
             rom[HADDR-ROM_START] <= HWDATA[7:0];
