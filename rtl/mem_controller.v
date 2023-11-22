@@ -1,6 +1,4 @@
 module mem_controller(
-    input HCLK,
-    input HRESET,
     input HTRANS_1,
     input HTRANS_2,
     input [63:0] HADDR_1,
@@ -9,9 +7,9 @@ module mem_controller(
     input HWRITE_2,
     input [63:0] HWDATA_1,
     input [63:0] HWDATA_2,
-    output [63:0] PADDR,
-    output HWRITE,
-    output [63:0] PDATA,
+    output reg [63:0] PADDR,
+    output reg HWRITE,
+    output reg [63:0] PDATA,
     output reg stall
 );
 
@@ -19,7 +17,7 @@ always @ (negedge HRESET) begin
     stall <= 0;
 end
 
-always @ (posedge HCLK) begin
+always @ (*) begin
     if(HTRANS_1 && HTRANS_2) begin
         PADDR <= HADDR_1;
         HWRITE <= HWRITE_1;
