@@ -9,12 +9,13 @@ module inst_decode(
     output reg [19:0] imm20,
     output reg [63:0] op1,
     output reg [63:0] op2,
-    output reg [63:0] wb
+    output reg [63:0] wb,
+    output reg mem_acc
 );
 
 parameter ALGORITHM = 7'b0110011;
-parameter ALGORITHM_IMM = 7'0010011;
-parameter 
+parameter ALGORITHM_IMM = 7'b0010011;
+parameter LOAD = 7'b0000011;
 
 reg [63:0] registers[31:0];
 
@@ -27,6 +28,7 @@ always @ (posedge CLK) begin
         funct7 <= inst[31:25];
         op1 <= registers[inst[19:15]];
         op2 <= registers[inst[24:20]];
+        mem_acc <= 0;
     end
     else if(inst[6:0] == ALGORITHM_IMM) begin
         rd <= inst[11:7];
@@ -35,6 +37,16 @@ always @ (posedge CLK) begin
         imm20 <= inst[31:20];
         op1 <= registers[inst[19:15]];
         op2 <= {{(52)inst[31]},inst[31:20]};
+        mem_acc <= 0;
+    end
+    else if(inst[6:0] == LOAD) begin
+        rd <= inst[11:7];
+        funct3 <= inst[14:12];
+        rs1 <= inst[19:15];
+        imm20 <= inst[31:20];
+        op1 <= registers[inst[19:15]];
+        op2 <= {{(52)inst[31]},inst[31:20]};
+        mem_acc <= 1;
     end
 end
 
