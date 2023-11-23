@@ -5,7 +5,7 @@ module cpu_top(
 
 
 wire HTRANS_1;
-wire HTRANS_2 = 0;
+wire HTRANS_2;
 wire [63:0] HADDR_1;
 wire [63:0] HADDR_2;
 wire HWRITE_1 = 0;
