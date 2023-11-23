@@ -26,6 +26,18 @@ parameter LOAD = 7'b0000011;
 reg [63:0] registers[31:0];
 integer rst_i;
 
+function [63:0] get_register_value;
+input [4:0] idx;
+begin
+    if(idx == wb_rd && wb_en) begin
+        get_register_value = wb_value;
+    end
+    else begin
+        get_register_value = registers[idx];
+    end
+end
+endfunction
+
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
@@ -43,8 +55,8 @@ always @ (posedge CLK or negedge reset) begin
             rs1 <= inst[19:15];
             rs2 <= inst[24:20];
             funct7 <= inst[31:25];
-            op1 <= registers[inst[19:15]];
-            op2 <= registers[inst[24:20]];
+            op1 <= get_register_value(inst[19:15]);
+            op2 <= get_register_value(inst[24:20]);
             mem_acc <= 0;
             load_flag <= 0;
             write_back <= 1;
@@ -54,7 +66,7 @@ always @ (posedge CLK or negedge reset) begin
             funct3 <= inst[14:12];
             rs1 <= inst[19:15];
             imm20 <= inst[31:20];
-            op1 <= registers[inst[19:15]];
+            op1 <= get_register_value(inst[19:15]);
             op2 <= {{(52){inst[31]}},inst[31:20]};
             mem_acc <= 0;
             load_flag <= 0;
@@ -65,7 +77,7 @@ always @ (posedge CLK or negedge reset) begin
             funct3 <= 3'b000;
             rs1 <= inst[19:15];
             imm20 <= inst[31:20];
-            op1 <= registers[inst[19:15]];
+            op1 <= get_register_value(inst[19:15]);
             op2 <= {{(52){inst[31]}},inst[31:20]};
             mem_acc <= 1;
             load_flag <= 1;
