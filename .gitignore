@@ -8,3 +8,9 @@ simulation/modelsim/rtl_work
 *.vo
 *.do.bak*
 *.wlf
+*.ini
+msim_transcript
+*.do
+*.rpt
+*.qpf
+*.qsf
