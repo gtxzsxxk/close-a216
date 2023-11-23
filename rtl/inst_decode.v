@@ -60,6 +60,7 @@ always @ (posedge CLK or negedge reset) begin
             mem_acc <= 0;
             load_flag <= 0;
             write_back <= 1;
+            imm_flag <= 0;
         end
         else if(inst[6:0] == ALGORITHM_IMM) begin
             rd <= inst[11:7];
@@ -71,6 +72,7 @@ always @ (posedge CLK or negedge reset) begin
             mem_acc <= 0;
             load_flag <= 0;
             write_back <= 1;
+            imm_flag <= 1;
         end
         else if(inst[6:0] == LOAD) begin
             rd <= inst[11:7];
@@ -82,6 +84,7 @@ always @ (posedge CLK or negedge reset) begin
             mem_acc <= 1;
             load_flag <= 1;
             write_back <= 1;
+            imm_flag <= 1;
         end
     end
 end

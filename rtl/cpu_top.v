@@ -99,12 +99,33 @@ wire [4:0] alu_rd;
 wire alu_load_flag;
 wire alu_mem_en_flag;
 
+wire [63:0] op1_fwd;
+wire [63:0] op2_fwd;
+
+wire [4:0] mem_rd;
+wire [63:0] mem_res;
+wire [63:0] mem_write_value;
+
+forward_unit fu(
+    .imm(imm_flag),
+    .alu_rd(alu_rd),
+    .mem_rd(mem_rd),
+    .rs1(rs1),
+    .rs2(rs2),
+    .alu_res(alu_res),
+    .mem_res(mem_res),
+    .op1_from_id(op1),
+    .op2_from_id(op2),
+    .op1_fwd(op1_fwd),
+    .op2_fwd(op2_fwd)
+);
+
 alu exec(
     .CLK(CLK),
     .imm(imm_flag),
     .rd_i(rd),
-    .op1(op1),
-    .op2(op2),
+    .op1(op1_fwd),
+    .op2(op2_fwd),
     .funct3(funct3),
     .funct7(funct7),
     .write_back(id_write_back_en),
@@ -116,10 +137,6 @@ alu exec(
     .load_flag_o(alu_load_flag),
     .mem_en_o(alu_mem_en_flag)
 );
-
-wire [4:0] mem_rd;
-wire [63:0] mem_res;
-wire [63:0] mem_write_value;
 
 mem_access m_a(
     .CLK(CLK),
