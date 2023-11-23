@@ -8,10 +8,12 @@ module alu(
     input [6:0] funct7,
     input write_back,
     input load_flag_i,
+    input mem_en_i,
     output reg [63:0] res,
     output reg alu_write_back_en,
     output reg [4:0] rd_o,
-    output reg load_flag_o
+    output reg load_flag_o,
+    output reg mem_en_o
 );
 
 wire [5:0] shift;
@@ -77,6 +79,7 @@ always @ (posedge CLK) begin
     end
     alu_write_back_en <= write_back;
     rd_o <= rd_i;
+    mem_en_o <= mem_en_i;
 end
 
 endmodule

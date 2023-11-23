@@ -13,13 +13,13 @@ reg [7:0] rom[ROM_SIZE-1:0];
 integer rst_i;
 
 always @(*) begin
-    for(rst_i=4;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
+    for(rst_i=8;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
         rom[rst_i] <= rst_i;
     end
     /* ld x2, 8(x0) */
     rom[7] = 8'h00;
-    rom[6] = 8'h40;
-    rom[5] = 8'h00;
+    rom[6] = 8'h80;
+    rom[5] = 8'h31;
     rom[4] = 8'h03;
 
     /* addi x1, x0, 0 */

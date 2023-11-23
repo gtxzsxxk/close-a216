@@ -46,6 +46,7 @@ always @ (posedge CLK or negedge reset) begin
             op1 <= registers[inst[19:15]];
             op2 <= registers[inst[24:20]];
             mem_acc <= 0;
+            load_flag <= 0;
             write_back <= 1;
         end
         else if(inst[6:0] == ALGORITHM_IMM) begin
@@ -56,6 +57,7 @@ always @ (posedge CLK or negedge reset) begin
             op1 <= registers[inst[19:15]];
             op2 <= {{(52){inst[31]}},inst[31:20]};
             mem_acc <= 0;
+            load_flag <= 0;
             write_back <= 1;
         end
         else if(inst[6:0] == LOAD) begin
