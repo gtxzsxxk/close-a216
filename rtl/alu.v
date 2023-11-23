@@ -7,9 +7,11 @@ module alu(
     input [2:0] funct3,
     input [6:0] funct7,
     input write_back,
+    input load_flag_i,
     output reg [63:0] res,
     output reg alu_write_back_en,
-    output reg [4:0] rd_o
+    output reg [4:0] rd_o,
+    output reg load_flag_o
 );
 
 wire [5:0] shift;

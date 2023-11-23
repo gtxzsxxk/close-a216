@@ -67,6 +67,7 @@ wire alu_write_back_en;
 wire mem_write_back_en;
 wire imm_flag;
 wire mem_acc;
+wire load_flag;
 wire [63:0] alu_res;
 
 wire [4:0] wb_rd;
@@ -90,10 +91,12 @@ inst_decode i_d(
     .op2(op2),
     .write_back(id_write_back_en),
     .imm_flag(imm_flag),
-    .mem_acc(mem_acc)
+    .mem_acc(mem_acc),
+    .load_flag(load_flag)
 );
 
 wire [4:0] alu_rd;
+wire alu_load_flag;
 
 alu exec(
     .CLK(CLK),
@@ -104,24 +107,24 @@ alu exec(
     .funct3(funct3),
     .funct7(funct7),
     .write_back(id_write_back_en),
+    .load_flag_i(load_flag),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),
-    .rd_o(alu_rd)
+    .rd_o(alu_rd),
+    .load_flag_o(alu_load_flag)
 );
 
 wire [4:0] mem_rd;
 wire [63:0] mem_res;
-wire mem_write;
-wire [63:0] mem_addr;
-wire [63:0] mem_value;
+wire [63:0] mem_write_value;
 
 mem_access m_a(
     .CLK(CLK),
     .EN(mem_acc),
     .rd_i(alu_rd),
-    .address(mem_addr),
-    .WRITE(mem_write),
-    .value(mem_value),
+    .address(alu_res),
+    .LOAD(alu_load_flag),
+    .value(mem_write_value),
     .HRDATA(HRDATA),
     .alu_res(alu_res),
     .write_back(alu_write_back_en),

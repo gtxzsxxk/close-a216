@@ -3,7 +3,7 @@ module mem_access(
     input EN,
     input [4:0] rd_i,
     input [63:0] address,
-    input WRITE,
+    input LOAD,
     input [63:0] value,
     input [63:0] HRDATA,
     input [63:0] alu_res,
@@ -19,9 +19,9 @@ module mem_access(
 
 always @ (posedge CLK) begin
     if(EN) begin
-        HWRITE <= WRITE;
+        HWRITE <= ~LOAD;
         HADDR <= address;
-        if(WRITE) begin
+        if(!LOAD) begin
             HWDATA <= value;
         end
         res <= HRDATA;

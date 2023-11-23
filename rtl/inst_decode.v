@@ -15,7 +15,8 @@ module inst_decode(
     output reg [63:0] op2,
     output reg write_back,
     output reg imm_flag,
-    output reg mem_acc
+    output reg mem_acc,
+    output reg load_flag
 );
 
 parameter ALGORITHM = 7'b0110011;
@@ -59,12 +60,13 @@ always @ (posedge CLK or negedge reset) begin
         end
         else if(inst[6:0] == LOAD) begin
             rd <= inst[11:7];
-            funct3 <= inst[14:12];
+            funct3 <= 3'b000;
             rs1 <= inst[19:15];
             imm20 <= inst[31:20];
             op1 <= registers[inst[19:15]];
             op2 <= {{(52){inst[31]}},inst[31:20]};
             mem_acc <= 1;
+            load_flag <= 1;
             write_back <= 1;
         end
     end
