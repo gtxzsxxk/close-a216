@@ -18,30 +18,22 @@ module mem_access(
     output reg mem_write_back_en
 );
 
+assign res = EN ? HRDATA : alu_res;
+
 always @ (posedge CLK) begin
-    if(stall) begin
-        res <= 0;
-        HTRANS <= 0;
-        rd_o <= 0;
-        mem_write_back_en <= 0;
-    end
-    else begin
-        if(EN) begin
-            HWRITE <= ~LOAD;
-            HADDR <= address;
-            if(!LOAD) begin
-                HWDATA <= value;
-            end
-            res <= HRDATA;
-            HTRANS <= 1;
-        end 
-        else begin
-            res <= alu_res;
-            HTRANS <= 0;
+    if(EN) begin
+        HWRITE <= ~LOAD;
+        HADDR <= address;
+        if(!LOAD) begin
+            HWDATA <= value;
         end
-        rd_o <= rd_i;
-        mem_write_back_en <= write_back;
+        HTRANS <= 1;
+    end 
+    else begin
+        HTRANS <= 0;
     end
+    rd_o <= rd_i;
+    mem_write_back_en <= write_back;
 end
 
 endmodule
