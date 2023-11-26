@@ -1,6 +1,7 @@
 module inst_fetch(
     input CLK,
     input reset,
+    input stall,
     input [63:0] HRDATA,
     output reg [63:0] HADDR,
     output reg [31:0] inst,
@@ -16,10 +17,18 @@ always @ (posedge CLK or negedge reset) begin
         HTRANS <= 1;
     end
     else begin
-        inst <= HRDATA;
-        PC <= PC + 4;
-        HADDR <= PC + 4;
-        HTRANS <= 1;
+        if(stall) begin
+            inst <= inst;
+            PC <= PC;
+            HADDR <= HADDR;
+            HTRANS <= 0;
+        end
+        else begin
+            inst <= HRDATA;
+            PC <= PC + 4;
+            HADDR <= PC + 4;
+            HTRANS <= 1;
+        end
     end
 end
 

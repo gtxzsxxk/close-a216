@@ -16,7 +16,11 @@ wire [63:0] PADDR;
 wire HWRITE;
 wire [63:0] PDATA;
 wire [63:0] HRDATA;
+wire stall_from_pc_and_mem;
+wire stall_from_load;
 wire stall;
+
+assign stall = stall_from_pc_and_mem | stall_from_load;
 
 wire c_zero = 0;
 
@@ -35,7 +39,7 @@ mem_controller mc(
     .PADDR(PADDR),
     .HWRITE(HWRITE),
     .PDATA(PDATA),
-    .stall(stall)
+    .stall(stall_from_pc_and_mem)
 );
 
 irom internal_rom(
@@ -48,6 +52,7 @@ irom internal_rom(
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
+    .stall(stall),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
@@ -81,6 +86,7 @@ inst_decode i_d(
     .wb_rd(wb_rd),
     .wb_value(wb_value),
     .wb_en(wb_en),
+    .stall(stall),
     .rd(rd),
     .rs1(rs1),
     .rs2(rs2),
@@ -92,7 +98,8 @@ inst_decode i_d(
     .write_back(id_write_back_en),
     .imm_flag(imm_flag),
     .mem_acc(mem_acc),
-    .load_flag(load_flag)
+    .load_flag(load_flag),
+    .stall_raise(stall_from_load)
 );
 
 wire [4:0] alu_rd;
@@ -131,6 +138,7 @@ alu exec(
     .write_back(id_write_back_en),
     .load_flag_i(load_flag),
     .mem_en_i(mem_acc),
+    .stall(stall),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),
     .rd_o(alu_rd),
@@ -148,6 +156,7 @@ mem_access m_a(
     .HRDATA(HRDATA),
     .alu_res(alu_res),
     .write_back(alu_write_back_en),
+    .stall(stall),
     .HADDR(HADDR_2),
     .HWDATA(HWDATA_2),
     .HWRITE(HWRITE_2),
@@ -159,6 +168,7 @@ mem_access m_a(
 
 write_back w_b(
     .EN(mem_write_back_en),
+    .stall(stall),
     .rd(mem_rd),
     .value(mem_res),
     .wb_rd(wb_rd),

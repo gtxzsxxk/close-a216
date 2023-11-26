@@ -8,6 +8,7 @@ module mem_access(
     input [63:0] HRDATA,
     input [63:0] alu_res,
     input write_back,
+    input stall,
     output reg [63:0] HADDR,
     output reg [63:0] HWDATA,
     output reg HWRITE,
@@ -18,21 +19,29 @@ module mem_access(
 );
 
 always @ (posedge CLK) begin
-    if(EN) begin
-        HWRITE <= ~LOAD;
-        HADDR <= address;
-        if(!LOAD) begin
-            HWDATA <= value;
-        end
-        res <= HRDATA;
-        HTRANS <= 1;
-    end 
-    else begin
-        res <= alu_res;
+    if(stall) begin
+        res <= 0;
         HTRANS <= 0;
+        rd_o <= 0;
+        mem_write_back_en <= 0;
     end
-    rd_o <= rd_i;
-    mem_write_back_en <= write_back;
+    else begin
+        if(EN) begin
+            HWRITE <= ~LOAD;
+            HADDR <= address;
+            if(!LOAD) begin
+                HWDATA <= value;
+            end
+            res <= HRDATA;
+            HTRANS <= 1;
+        end 
+        else begin
+            res <= alu_res;
+            HTRANS <= 0;
+        end
+        rd_o <= rd_i;
+        mem_write_back_en <= write_back;
+    end
 end
 
 endmodule
