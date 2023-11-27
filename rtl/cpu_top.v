@@ -28,14 +28,14 @@ reg if_reset = 1;
 wire [31:0] inst;
 
 mem_controller mc(
-    .HTRANS_1(HTRANS_1),
-    .HTRANS_2(HTRANS_2),
-    .HADDR_1(HADDR_1),
-    .HADDR_2(HADDR_2),
-    .HWRITE_1(HWRITE_1),
-    .HWRITE_2(HWRITE_2),
-    .HWDATA_1(HWDATA_1),
-    .HWDATA_2(HWDATA_2),
+    .HTRANS_1(HTRANS_2),
+    .HTRANS_2(HTRANS_1),
+    .HADDR_1(HADDR_2),
+    .HADDR_2(HADDR_1),
+    .HWRITE_1(HWRITE_2),
+    .HWRITE_2(HWRITE_1),
+    .HWDATA_1(HWDATA_2),
+    .HWDATA_2(HWDATA_1),
     .PADDR(PADDR),
     .HWRITE(HWRITE),
     .PDATA(PDATA),

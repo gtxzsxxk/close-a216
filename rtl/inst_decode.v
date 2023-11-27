@@ -42,20 +42,21 @@ end
 endfunction
 
 function [31:0] get_inst;
+input [31:0] m_inst;
 input stall_flag;
 begin
     if(stall_flag) begin
         get_inst = inst_last;
     end
     else begin
-        get_inst = inst;
+        get_inst = m_inst;
     end
 end
 endfunction
 
 wire [31:0] instruction;
 
-assign instruction = get_inst(stall);
+assign instruction = get_inst(inst,stall);
 
 /* judge whether to stall for the last load */
 function judge_stall;
@@ -93,6 +94,8 @@ always @ (posedge CLK or negedge reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
             registers[rst_i] <= 64'd0;
         end
+        stall_raise <= 0;
+        inst_last <= 32'h00000013;
     end
     else begin
         if(wb_en) begin

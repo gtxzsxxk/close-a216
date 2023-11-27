@@ -18,6 +18,8 @@ module mem_access(
     output reg mem_write_back_en
 );
 
+reg refresh_en = 0;
+
 always @ (posedge CLK) begin
     if(EN) begin
         HWRITE <= ~LOAD;
@@ -25,15 +27,24 @@ always @ (posedge CLK) begin
         if(!LOAD) begin
             HWDATA <= value;
         end
-        res <= HRDATA;
         HTRANS <= 1;
+        refresh_en <= 1;
     end 
     else begin
-        res <= alu_res;
         HTRANS <= 0;
+        refresh_en <= 0;
     end
     rd_o <= rd_i;
     mem_write_back_en <= write_back;
+end
+
+always @ (negedge CLK) begin
+    if(refresh_en) begin
+        res <= HRDATA;
+    end 
+    else begin
+        res <= alu_res;
+    end
 end
 
 endmodule
