@@ -18,20 +18,18 @@ always @ (*) begin
         PADDR <= HADDR_1;
         HWRITE <= HWRITE_1;
         PDATA <= HWDATA_1;
-        stall <= 1;
     end
     else if(HTRANS_1 && !HTRANS_2) begin
         PADDR <= HADDR_1;
         HWRITE <= HWRITE_1;
         PDATA <= HWDATA_1;
-        stall <= 0;
     end
     else if(!HTRANS_1 && HTRANS_2) begin
         PADDR <= HADDR_2;
         HWRITE <= HWRITE_2;
         PDATA <= HWDATA_2;
-        stall <= 0;
     end
+    stall <= HTRANS_1 & HTRANS_2;
 end
 
 endmodule

@@ -52,7 +52,7 @@ irom internal_rom(
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
-    .stall(stall_from_pc_and_mem),
+    .stall(stall),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
@@ -86,7 +86,7 @@ inst_decode i_d(
     .wb_rd(wb_rd),
     .wb_value(wb_value),
     .wb_en(wb_en),
-    .stall(stall),
+    .stall(stall_from_pc_and_mem),
     .rd(rd),
     .rs1(rs1),
     .rs2(rs2),
@@ -168,7 +168,6 @@ mem_access m_a(
 
 write_back w_b(
     .EN(mem_write_back_en),
-    .stall(stall),
     .rd(mem_rd),
     .value(mem_res),
     .wb_rd(wb_rd),
