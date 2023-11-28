@@ -52,7 +52,7 @@ irom internal_rom(
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
-    .stall(stall),
+    .stall(stall_from_pc_and_mem),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
