@@ -46,7 +46,7 @@ input [31:0] m_inst;
 input stall_flag;
 begin
     if(stall_flag) begin
-        get_inst = inst_last;
+        get_inst = 32'h00000013;
     end
     else begin
         get_inst = m_inst;
@@ -54,9 +54,7 @@ begin
 end
 endfunction
 
-wire [31:0] instruction;
-
-assign instruction = get_inst(inst,stall);
+reg [31:0] instruction = 0;
 
 /* judge whether to stall for the last load */
 function judge_stall;
@@ -94,57 +92,60 @@ always @ (posedge CLK or negedge reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
             registers[rst_i] <= 64'd0;
         end
-        stall_raise <= 0;
         inst_last <= 32'h00000013;
     end
     else begin
+        instruction <= get_inst(inst,stall);
         if(wb_en) begin
             registers[wb_rd] <= wb_value;
         end
         registers[0] <= 64'd0;
-        if(instruction[6:0] == ALGORITHM) begin
-            rd <= instruction[11:7];
-            funct3 <= instruction[14:12];
-            rs1 <= instruction[19:15];
-            rs2 <= instruction[24:20];
-            funct7 <= instruction[31:25];
-            op1 <= get_register_value(instruction[19:15]);
-            op2 <= get_register_value(instruction[24:20]);
-            mem_acc <= 0;
-            load_flag <= 0;
-            write_back <= 1;
-            imm_flag <= 0;
-            stall_raise <= judge_stall(inst_last[6:0],
-                instruction[19:15], instruction[24:20], 0);
-        end
-        else if(instruction[6:0] == ALGORITHM_IMM) begin
-            rd <= instruction[11:7];
-            funct3 <= instruction[14:12];
-            rs1 <= instruction[19:15];
-            imm20 <= instruction[31:20];
-            op1 <= get_register_value(instruction[19:15]);
-            op2 <= {{(52){instruction[31]}},instruction[31:20]};
-            mem_acc <= 0;
-            load_flag <= 0;
-            write_back <= 1;
-            imm_flag <= 1;
-            stall_raise <= judge_stall(inst_last[6:0],
-                instruction[19:15], 0, 1);
-        end
-        else if(instruction[6:0] == LOAD) begin
-            rd <= instruction[11:7];
-            funct3 <= 3'b000;
-            rs1 <= instruction[19:15];
-            imm20 <= instruction[31:20];
-            op1 <= get_register_value(instruction[19:15]);
-            op2 <= {{(52){instruction[31]}},instruction[31:20]};
-            mem_acc <= 1;
-            load_flag <= 1;
-            write_back <= 1;
-            imm_flag <= 1;
-            stall_raise <= 0;
-        end
         inst_last <= instruction;
+    end
+end
+
+always @ (negedge CLK) begin
+    if(instruction[6:0] == ALGORITHM) begin
+        rd <= instruction[11:7];
+        funct3 <= instruction[14:12];
+        rs1 <= instruction[19:15];
+        rs2 <= instruction[24:20];
+        funct7 <= instruction[31:25];
+        op1 <= get_register_value(instruction[19:15]);
+        op2 <= get_register_value(instruction[24:20]);
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 1;
+        imm_flag <= 0;
+        stall_raise <= judge_stall(inst_last[6:0],
+            instruction[19:15], instruction[24:20], 0);
+    end
+    else if(instruction[6:0] == ALGORITHM_IMM) begin
+        rd <= instruction[11:7];
+        funct3 <= instruction[14:12];
+        rs1 <= instruction[19:15];
+        imm20 <= instruction[31:20];
+        op1 <= get_register_value(instruction[19:15]);
+        op2 <= {{(52){instruction[31]}},instruction[31:20]};
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 1;
+        imm_flag <= 1;
+        stall_raise <= judge_stall(inst_last[6:0],
+            instruction[19:15], 0, 1);
+    end
+    else if(instruction[6:0] == LOAD) begin
+        rd <= instruction[11:7];
+        funct3 <= 3'b000;
+        rs1 <= instruction[19:15];
+        imm20 <= instruction[31:20];
+        op1 <= get_register_value(instruction[19:15]);
+        op2 <= {{(52){instruction[31]}},instruction[31:20]};
+        mem_acc <= 1;
+        load_flag <= 1;
+        write_back <= 1;
+        imm_flag <= 1;
+        stall_raise <= 0;
     end
 end
 
