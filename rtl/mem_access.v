@@ -19,6 +19,7 @@ module mem_access(
 );
 
 reg refresh_en = 0;
+reg [63:0] tmp_res;
 
 always @ (posedge CLK) begin
     if(EN) begin
@@ -33,6 +34,7 @@ always @ (posedge CLK) begin
     else begin
         HTRANS <= 0;
         refresh_en <= 0;
+        tmp_res <= alu_res;
     end
     rd_o <= rd_i;
     mem_write_back_en <= write_back;
@@ -41,9 +43,9 @@ end
 always @ (negedge CLK) begin
     if(refresh_en) begin
         res <= HRDATA;
-    end 
+    end
     else begin
-        res <= alu_res;
+        res <= tmp_res;
     end
 end
 

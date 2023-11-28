@@ -22,8 +22,6 @@ wire stall;
 
 assign stall = stall_from_pc_and_mem | stall_from_load;
 
-wire c_zero = 0;
-
 reg if_reset = 1;
 wire [31:0] inst;
 
@@ -45,8 +43,7 @@ mem_controller mc(
 irom internal_rom(
     .HADDR(PADDR),
     .HWDATA(PDATA),
-    .HRDATA(HRDATA),
-    .HWRITE(c_zero)
+    .HRDATA(HRDATA)
 );
 
 inst_fetch i_f(
@@ -138,7 +135,7 @@ alu exec(
     .write_back(id_write_back_en),
     .load_flag_i(load_flag),
     .mem_en_i(mem_acc),
-    .stall(stall),
+    // .stall(stall),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),
     .rd_o(alu_rd),

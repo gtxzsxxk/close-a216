@@ -31,7 +31,7 @@ integer rst_i;
 function [63:0] get_register_value;
 input [4:0] idx;
 begin
-    if(idx == wb_rd && wb_en) begin
+    if(idx == wb_rd && wb_en && idx != 0) begin
         get_register_value = wb_value;
     end
     else begin
@@ -54,6 +54,15 @@ end
 endfunction
 
 reg [31:0] instruction = 0;
+
+wire [31:0] inst_two_op = get_inst(inst,stall | judge_stall(instruction[6:0],
+                inst[19:15], inst[24:20], 0));
+
+wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(instruction[6:0],
+                inst[19:15], 0, 1));
+
+wire [31:0] inst_load = get_inst(inst,stall);
+
 
 /* judge whether to stall for the last load */
 function judge_stall;
@@ -98,21 +107,19 @@ always @ (posedge CLK or negedge reset) begin
         end
         registers[0] <= 64'd0;
 
-        if(inst[6:0] == ALGORITHM) begin
+        if(inst_two_op[6:0] == ALGORITHM) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
-            instruction <= get_inst(inst,stall | judge_stall(instruction[6:0],
-                inst[19:15], inst[24:20], 0));
+            instruction <= inst_two_op;
         end
-        else if(inst[6:0] == ALGORITHM_IMM) begin
+        else if(inst_imm[6:0] == ALGORITHM_IMM) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], 0, 1);
-            instruction <= get_inst(inst,stall | judge_stall(instruction[6:0],
-                inst[19:15], 0, 1));
+            instruction <= inst_imm;
         end
-        else if(inst[6:0] == LOAD) begin
+        else if(inst_load[6:0] == LOAD) begin
             stall_raise <= 0;
-            instruction <= get_inst(inst,stall);
+            instruction <= inst_load;
         end
     end
 end

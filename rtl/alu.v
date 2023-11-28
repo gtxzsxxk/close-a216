@@ -9,7 +9,7 @@ module alu(
     input write_back,
     input load_flag_i,
     input mem_en_i,
-    input stall,
+    // input stall,
     output reg [63:0] res,
     output reg alu_write_back_en,
     output reg [4:0] rd_o,
@@ -22,14 +22,14 @@ wire [5:0] shift;
 assign shift = op2[5:0];
 
 always @ (posedge CLK) begin
-    if(stall) begin
-        /* addi x0, x0, 0 */
-        res <= 0;
-        alu_write_back_en <= 0;
-        rd_o <= 0;
-        mem_en_o <= 0;
-    end
-    else begin
+    // if(stall) begin
+    //     /* addi x0, x0, 0 */
+    //     res <= 0;
+    //     alu_write_back_en <= 0;
+    //     rd_o <= 0;
+    //     mem_en_o <= 0;
+    // end
+    // else begin
         if(funct3 == 3'b000) begin
         /* ADD SUB */
             if(imm) begin
@@ -89,7 +89,7 @@ always @ (posedge CLK) begin
         alu_write_back_en <= write_back;
         rd_o <= rd_i;
         mem_en_o <= mem_en_i;
-    end
+    // end
 end
 
 endmodule
