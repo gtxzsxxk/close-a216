@@ -22,7 +22,7 @@ always @ (posedge CLK or negedge reset) begin
         if(stall) begin
             PC <= PC;
             HADDR <= HADDR;
-            HTRANS <= 0;
+            HTRANS <= 1;
         end
         else begin
             PC <= PC + 4;
