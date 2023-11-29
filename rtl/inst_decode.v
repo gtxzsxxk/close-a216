@@ -78,7 +78,7 @@ input imm;
 begin
     if(last_cmd == LOAD) begin
         if(imm) begin
-            if(cur_rs1 == rd) begin
+            if(cur_rs1 == rd && cur_rs1 != 0) begin
                 judge_stall = 1;
             end
             else begin
@@ -86,7 +86,8 @@ begin
             end
         end
         else begin
-            if(cur_rs1 == rd || cur_rs2 == rd) begin
+            if((cur_rs1 == rd && cur_rs1 != 0) 
+                || (cur_rs2 == rd && cur_rs2 != 0)) begin
                 judge_stall = 1;
             end
             else begin
@@ -112,18 +113,18 @@ always @ (posedge CLK or negedge reset) begin
         end
         registers[0] <= 64'd0;
 
-        if(inst_two_op[6:0] == ALGORITHM || 
-            inst_two_op[6:0] == BRANCH) begin
+        if(inst[6:0] == ALGORITHM || 
+            inst[6:0] == BRANCH) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
         end
-        else if(inst_imm[6:0] == ALGORITHM_IMM) begin
+        else if(inst[6:0] == ALGORITHM_IMM) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], 0, 1);
             instruction <= inst_imm;
         end
-        else if(inst_load[6:0] == LOAD) begin
+        else if(inst[6:0] == LOAD) begin
             stall_raise <= 0;
             instruction <= inst_load;
         end
