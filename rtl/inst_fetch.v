@@ -3,14 +3,14 @@ module inst_fetch(
     input reset,
     input stall,
     input take_branch,
+    input [63:0] branch_PC,
     input [63:0] take_branch_offset,
     input [63:0] HRDATA,
     output reg [63:0] HADDR,
     output reg [31:0] inst,
-    output reg HTRANS
+    output reg HTRANS,
+    output reg [63:0] PC
 );
-
-reg [63:0] PC;
 
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
@@ -26,8 +26,8 @@ always @ (posedge CLK or negedge reset) begin
         end
         else begin
             if(take_branch) begin
-                PC <= PC - 12 + take_branch_offset;
-                HADDR <= PC - 12 + take_branch_offset;
+                PC <= branch_PC + take_branch_offset;
+                HADDR <= branch_PC + take_branch_offset;
             end
             else begin
                 PC <= PC + 4;

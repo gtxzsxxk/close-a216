@@ -11,6 +11,7 @@ module mem_access(
     input stall,
     input branch_flag_i, /* is the instruction branch */
     input [63:0] branch_offset_i,
+    input [63:0] PC_i,
     output reg [63:0] HADDR,
     output reg [63:0] HWDATA,
     output reg HWRITE,
@@ -19,7 +20,8 @@ module mem_access(
     output reg [4:0] rd_o,
     output reg mem_write_back_en,
     output reg take_branch, /* should we take the branch according to alu */
-    output reg [63:0] branch_offset_o
+    output reg [63:0] branch_offset_o,
+    output reg [63:0] PC_o
 );
 
 reg refresh_en = 0;
@@ -56,6 +58,7 @@ always @ (posedge CLK) begin
     else begin
         take_branch <= 0;
     end
+    PC_o <= PC_i;
 end
 
 always @ (negedge CLK) begin

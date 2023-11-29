@@ -12,6 +12,7 @@ module alu(
     input take_branch,
     input branch_flag_i,
     input [63:0] branch_offset_i,
+    input [63:0] PC_i,
     // input stall,
     output reg [63:0] res,
     output reg alu_write_back_en,
@@ -19,7 +20,8 @@ module alu(
     output reg load_flag_o,
     output reg mem_en_o,
     output reg branch_flag_o,
-    output reg [63:0] branch_offset_o
+    output reg [63:0] branch_offset_o,
+    output reg [63:0] PC_o
 );
 
 wire [5:0] shift;
@@ -132,6 +134,7 @@ always @ (posedge CLK) begin
 
     branch_flag_o <= branch_flag_i;
     branch_offset_o <= branch_offset_i;
+    PC_o <= PC_i;
     // end
 end
 

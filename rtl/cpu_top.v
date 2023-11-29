@@ -49,16 +49,21 @@ irom internal_rom(
 wire take_branch;
 wire [63:0] take_branch_offset;
 
+wire [63:0] if_PC;
+wire [63:0] mem_PC;
+
 inst_fetch i_f(
     .CLK(CLK),
     .reset(if_reset),
     .stall(stall),
     .take_branch(take_branch),
+    .branch_PC(mem_PC),
     .take_branch_offset(take_branch_offset),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
-    .HTRANS(HTRANS_1)
+    .HTRANS(HTRANS_1),
+    .PC(if_PC)
 );
 
 wire [4:0] rd;
@@ -86,6 +91,8 @@ wire id_branch_flag;
 
 wire id_stall = stall_from_pc_and_mem | take_branch;
 
+wire [63:0] id_PC;
+
 inst_decode i_d(
     .CLK(CLK),
     .reset(if_reset),
@@ -94,6 +101,7 @@ inst_decode i_d(
     .wb_value(wb_value),
     .wb_en(wb_en),
     .stall(id_stall),
+    .PC_i(if_PC),
     .rd(rd),
     .rs1(rs1),
     .rs2(rs2),
@@ -108,7 +116,8 @@ inst_decode i_d(
     .load_flag(load_flag),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
-    .branch_flag(id_branch_flag)
+    .branch_flag(id_branch_flag),
+    .PC_o(id_PC)
 );
 
 wire [4:0] alu_rd;
@@ -124,6 +133,8 @@ wire [63:0] mem_write_value;
 
 wire [63:0] alu_branch_offset;
 wire alu_branch_flag;
+
+wire [63:0] alu_PC;
 
 forward_unit fu(
     .imm(imm_flag),
@@ -153,6 +164,7 @@ alu exec(
     .take_branch(take_branch),
     .branch_flag_i(id_branch_flag),
     .branch_offset_i(id_branch_offset),
+    .PC_i(id_PC),
     // .stall(stall),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),
@@ -160,7 +172,8 @@ alu exec(
     .load_flag_o(alu_load_flag),
     .mem_en_o(alu_mem_en_flag),
     .branch_flag_o(alu_branch_flag),
-    .branch_offset_o(alu_branch_offset)
+    .branch_offset_o(alu_branch_offset),
+    .PC_o(alu_PC)
 );
 
 mem_access m_a(
@@ -176,6 +189,7 @@ mem_access m_a(
     .stall(stall),
     .branch_flag_i(alu_branch_flag),
     .branch_offset_i(alu_branch_offset),
+    .PC_i(alu_PC),
     .HADDR(HADDR_2),
     .HWDATA(HWDATA_2),
     .HWRITE(HWRITE_2),
@@ -184,7 +198,8 @@ mem_access m_a(
     .rd_o(mem_rd),
     .mem_write_back_en(mem_write_back_en),
     .take_branch(take_branch),
-    .branch_offset_o(take_branch_offset)
+    .branch_offset_o(take_branch_offset),
+    .PC_o(mem_PC)
 );
 
 write_back w_b(

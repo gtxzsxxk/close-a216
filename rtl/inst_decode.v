@@ -6,6 +6,7 @@ module inst_decode(
     input [63:0] wb_value,
     input wb_en,
     input stall,
+    input [63:0] PC_i,
     output reg [4:0] rd,
     output reg [4:0] rs1,
     output reg [4:0] rs2,
@@ -20,7 +21,8 @@ module inst_decode(
     output reg load_flag,
     output reg stall_raise,
     output reg [63:0] branch_offset,
-    output reg branch_flag
+    output reg branch_flag,
+    output reg [63:0] PC_o
 );
 
 parameter ALGORITHM = 7'b0110011;
@@ -128,6 +130,7 @@ always @ (posedge CLK or negedge reset) begin
         else begin
             instruction <= 32'h00000013;
         end
+        PC_o <= PC_i;
     end
 end
 
