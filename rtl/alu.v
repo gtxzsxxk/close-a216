@@ -1,6 +1,7 @@
 module alu(
     input CLK,
     input imm,
+    input branch,
     input [4:0] rd_i,
     input [63:0] op1,
     input [63:0] op2,
@@ -30,6 +31,7 @@ always @ (posedge CLK) begin
     //     mem_en_o <= 0;
     // end
     // else begin
+    if(!branch) begin
         if(funct3 == 3'b000) begin
         /* ADD SUB */
             if(imm) begin
@@ -86,9 +88,36 @@ always @ (posedge CLK) begin
         else if(funct3 == 3'b111) begin
             res <= op1 & op2;
         end
-        alu_write_back_en <= write_back;
-        rd_o <= rd_i;
-        mem_en_o <= mem_en_i;
+    end
+    else begin
+        if(funct3 == 3'b000) begin
+            /* BEQ */
+            res <= {63'b0, op1 == op2};
+        end
+        else if(funct3 == 3'b001) begin
+            /* BNE */
+            res <= {63'b0, op1 != op2};
+        end
+        else if(funct3 == 3'b100) begin
+            /* BLT */
+            res <= {63'b0, $signed(op1) < $signed(op2)};
+        end
+        else if(funct3 == 3'b101) begin
+            /* BGE */
+            res <= {63'b0, $signed(op1) > $signed(op2)};
+        end
+        else if(funct3 == 3'b110) begin
+            /* BLTU */
+            res <= {63'b0, $unsigned(op1) < $unsigned(op2)};
+        end
+        else if(funct3 == 3'b111) begin
+            /* BGEU */
+            res <= {63'b0, $unsigned(op1) > $unsigned(op2)};
+        end
+    end
+    alu_write_back_en <= write_back;
+    rd_o <= rd_i;
+    mem_en_o <= mem_en_i;
     // end
 end
 

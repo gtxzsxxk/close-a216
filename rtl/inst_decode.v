@@ -18,12 +18,14 @@ module inst_decode(
     output reg imm_flag,
     output reg mem_acc,
     output reg load_flag,
-    output reg stall_raise
+    output reg stall_raise,
+    output reg [63:0] branch_offset
 );
 
 parameter ALGORITHM = 7'b0110011;
 parameter ALGORITHM_IMM = 7'b0010011;
 parameter LOAD = 7'b0000011;
+parameter BRANCH = 7'b1100011;
 
 reg [63:0] registers[31:0];
 integer rst_i;
@@ -161,6 +163,19 @@ always @ (negedge CLK) begin
         load_flag <= 1;
         write_back <= 1;
         imm_flag <= 1;
+    end
+    else if(instruction[6:0] == BRANCH) begin
+        branch_offset <= {{(51){instruction[31]}},instruction[31],
+            instruction[7],instruction[30:25],instruction[11:8],1'b0};
+        funct3 <= instruction[14:12];
+        rs1 <= instruction[19:15];
+        rs2 <= instruction[24:20];
+        op1 <= get_register_value(instruction[19:15]);
+        op2 <= get_register_value(instruction[24:20]);
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 0;
+        imm_flag <= 0;
     end
 end
 
