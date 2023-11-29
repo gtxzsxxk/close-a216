@@ -125,6 +125,9 @@ always @ (posedge CLK or negedge reset) begin
             stall_raise <= 0;
             instruction <= inst_load;
         end
+        else begin
+            instruction <= 32'h00000013;
+        end
     end
 end
 
