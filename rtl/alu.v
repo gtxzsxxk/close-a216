@@ -1,7 +1,6 @@
 module alu(
     input CLK,
     input imm,
-    input branch,
     input [4:0] rd_i,
     input [63:0] op1,
     input [63:0] op2,
@@ -10,12 +9,17 @@ module alu(
     input write_back,
     input load_flag_i,
     input mem_en_i,
+    input take_branch,
+    input branch_flag_i,
+    input [63:0] branch_offset_i,
     // input stall,
     output reg [63:0] res,
     output reg alu_write_back_en,
     output reg [4:0] rd_o,
     output reg load_flag_o,
-    output reg mem_en_o
+    output reg mem_en_o,
+    output reg branch_flag_o,
+    output reg [63:0] branch_offset_o
 );
 
 wire [5:0] shift;
@@ -31,7 +35,7 @@ always @ (posedge CLK) begin
     //     mem_en_o <= 0;
     // end
     // else begin
-    if(!branch) begin
+    if(!branch_flag_i) begin
         if(funct3 == 3'b000) begin
         /* ADD SUB */
             if(imm) begin
@@ -115,9 +119,19 @@ always @ (posedge CLK) begin
             res <= {63'b0, $unsigned(op1) > $unsigned(op2)};
         end
     end
-    alu_write_back_en <= write_back;
-    rd_o <= rd_i;
-    mem_en_o <= mem_en_i;
+    if(take_branch) begin
+        alu_write_back_en <= 0;
+        rd_o <= 0;
+        mem_en_o <= 0;
+    end
+    else begin
+        alu_write_back_en <= write_back;
+        rd_o <= rd_i;
+        mem_en_o <= mem_en_i;
+    end
+
+    branch_flag_o <= branch_flag_i;
+    branch_offset_o <= branch_offset_i;
     // end
 end
 

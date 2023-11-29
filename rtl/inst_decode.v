@@ -19,7 +19,8 @@ module inst_decode(
     output reg mem_acc,
     output reg load_flag,
     output reg stall_raise,
-    output reg [63:0] branch_offset
+    output reg [63:0] branch_offset,
+    output reg branch_flag
 );
 
 parameter ALGORITHM = 7'b0110011;
@@ -104,12 +105,13 @@ always @ (posedge CLK or negedge reset) begin
         end
     end
     else begin
-        if(wb_en) begin
+        if(wb_en && wb_rd != 0) begin
             registers[wb_rd] <= wb_value;
         end
         registers[0] <= 64'd0;
 
-        if(inst_two_op[6:0] == ALGORITHM) begin
+        if(inst_two_op[6:0] == ALGORITHM || 
+            inst_two_op[6:0] == BRANCH) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
@@ -139,6 +141,7 @@ always @ (negedge CLK) begin
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 0;
+        branch_flag <= 0;
     end
     else if(instruction[6:0] == ALGORITHM_IMM) begin
         rd <= instruction[11:7];
@@ -151,6 +154,7 @@ always @ (negedge CLK) begin
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 1;
+        branch_flag <= 0;
     end
     else if(instruction[6:0] == LOAD) begin
         rd <= instruction[11:7];
@@ -163,6 +167,7 @@ always @ (negedge CLK) begin
         load_flag <= 1;
         write_back <= 1;
         imm_flag <= 1;
+        branch_flag <= 0;
     end
     else if(instruction[6:0] == BRANCH) begin
         branch_offset <= {{(51){instruction[31]}},instruction[31],
@@ -176,6 +181,19 @@ always @ (negedge CLK) begin
         load_flag <= 0;
         write_back <= 0;
         imm_flag <= 0;
+        branch_flag <= 1;
+    end
+    else begin
+        funct3 <= 0;
+        rs1 <= 0;
+        rs2 <= 0;
+        op1 <= 0;
+        op2 <= 0;
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 0;
+        imm_flag <= 0;
+        branch_flag <= 0;
     end
 end
 

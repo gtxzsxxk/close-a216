@@ -14,3 +14,4 @@ msim_transcript
 *.rpt
 *.qpf
 *.qsf
+cmake-build-*
