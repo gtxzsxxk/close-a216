@@ -26,7 +26,7 @@ module inst_decode(
 );
 
 parameter ALGORITHM = 7'b0110011;
-parameter ALGORITHM_64 = 7'0111011;
+parameter ALGORITHM_64 = 7'b0111011;
 parameter ALGORITHM_IMM = 7'b0010011;
 parameter ALGORITHM_64_IMM = 7'b0011011;
 parameter LOAD = 7'b0000011;
