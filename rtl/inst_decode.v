@@ -11,6 +11,7 @@ module inst_decode(
     output reg [4:0] rs1,
     output reg [4:0] rs2,
     output reg [2:0] funct3,
+    output reg [2:0] mem_para,
     output reg [6:0] funct7,
     output reg [19:0] imm20,
     output reg [63:0] op1,
@@ -23,15 +24,17 @@ module inst_decode(
     output reg stall_raise,
     output reg [63:0] branch_offset,
     output reg branch_flag,
-    output reg [63:0] PC_o
+    output reg [63:0] PC_o,
+    output reg [63:0] store_value
 );
 
 parameter ARITHMETIC = 7'b0110011;
 parameter ARITHMETIC_64 = 7'b0111011;
 parameter ARITHMETIC_IMM = 7'b0010011;
-parameter ARITHMETIC_64_IMM = 7'b0011011;
+parameter ARITHMETIC_IMM_64 = 7'b0011011;
 parameter LOAD = 7'b0000011;
 parameter BRANCH = 7'b1100011;
+parameter STORE = 7'b0100011;
 
 reg [63:0] registers[31:0];
 integer rst_i;
@@ -118,7 +121,8 @@ always @ (posedge CLK or negedge reset) begin
 
         if(inst[6:0] == ARITHMETIC || 
             inst[6:0] == BRANCH ||
-            inst[6:0] == ARITHMETIC_64) begin
+            inst[6:0] == ARITHMETIC_64 ||
+            inst[6:0] == STORE) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
@@ -156,6 +160,7 @@ always @ (negedge CLK) begin
         imm_flag <= 0;
         branch_flag <= 0;
         word_inst <= instruction[6:0] == ARITHMETIC_64;
+        mem_para <= 0;
     end
     else if(instruction[6:0] == ARITHMETIC_IMM ||
         instruction[6:0] == ARITHMETIC_IMM_64) begin
@@ -171,10 +176,14 @@ always @ (negedge CLK) begin
         imm_flag <= 1;
         branch_flag <= 0;
         word_inst <= instruction[6:0] == ARITHMETIC_IMM_64;
+        mem_para <= 0;
     end
     else if(instruction[6:0] == LOAD) begin
         rd <= instruction[11:7];
-        funct3 <= instruction[14:12];
+        /* let the alu calculate the address. 
+         * Here funct3 should be add */
+        funct3 <= 3'b000;
+        mem_para <= instruction[14:12];
         rs1 <= instruction[19:15];
         imm20 <= instruction[31:20];
         op1 <= get_register_value(instruction[19:15]);
@@ -185,6 +194,25 @@ always @ (negedge CLK) begin
         imm_flag <= 1;
         branch_flag <= 0;
         word_inst <= 0;
+    end
+    else if(instruction[6:0] == STORE) begin
+        store_value <= get_register_value(instruction[24:20]);
+        /* let the alu calculate the address. 
+         * Here funct3 should be add */
+        funct3 <= 3'b000;
+        mem_para <= instruction[14:12];
+        rs1 <= instruction[19:15];
+        rs2 <= instruction[24:20];
+        op1 <= get_register_value(instruction[19:15]);
+        op2 <= {{(52){instruction[31]}},instruction[31:25],instruction[11:7]};
+        mem_acc <= 1;
+        load_flag <= 0;
+        /* above EN and !LOAD is STORE */
+        write_back <= 0;
+        imm_flag <= 0;
+        branch_flag <= 0;
+        word_inst <= 0;
+        mem_para <= 0;
     end
     else if(instruction[6:0] == BRANCH) begin
         branch_offset <= {{(51){instruction[31]}},instruction[31],
@@ -200,6 +228,7 @@ always @ (negedge CLK) begin
         imm_flag <= 0;
         branch_flag <= 1;
         word_inst <= 0;
+        mem_para <= 0;
     end
     else begin
         funct3 <= 0;
@@ -213,6 +242,7 @@ always @ (negedge CLK) begin
         imm_flag <= 0;
         branch_flag <= 0;
         word_inst <= 0;
+        mem_para <= 0;
     end
 end
 

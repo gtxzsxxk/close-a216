@@ -9,7 +9,7 @@ wire HTRANS_2;
 wire [63:0] HADDR_1;
 wire [63:0] HADDR_2;
 wire HWRITE_1 = 0;
-wire HWRITE_2 = 0;
+wire HWRITE_2;
 wire [63:0] HWDATA_1;
 wire [63:0] HWDATA_2;
 wire [63:0] PADDR;
@@ -102,6 +102,9 @@ wire [63:0] id_PC;
 
 wire word_inst;
 
+wire [2:0] id_mem_para;
+wire [63:0] id_store_value;
+
 inst_decode i_d(
     .CLK(CLK),
     .reset(if_reset),
@@ -115,6 +118,7 @@ inst_decode i_d(
     .rs1(rs1),
     .rs2(rs2),
     .funct3(funct3),
+    .mem_para(id_mem_para),
     .funct7(funct7),
     .imm20(imm20),
     .op1(op1),
@@ -127,7 +131,8 @@ inst_decode i_d(
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
     .branch_flag(id_branch_flag),
-    .PC_o(id_PC)
+    .PC_o(id_PC),
+    .store_value(id_store_value)
 );
 
 wire [4:0] alu_rd;
@@ -139,12 +144,14 @@ wire [63:0] op2_fwd;
 
 wire [4:0] mem_rd;
 wire [63:0] mem_res;
-wire [63:0] mem_write_value;
 
 wire [63:0] alu_branch_offset;
 wire alu_branch_flag;
 
 wire [63:0] alu_PC;
+
+wire [2:0] alu_mem_para;
+wire [63:0] alu_store_value;
 
 forward_unit fu(
     .imm(imm_flag),
@@ -167,6 +174,7 @@ alu exec(
     .op1(op1_fwd),
     .op2(op2_fwd),
     .funct3(funct3),
+    .mem_para_i(id_mem_para),
     .funct7(funct7),
     .write_back(id_write_back_en),
     .load_flag_i(load_flag),
@@ -176,6 +184,7 @@ alu exec(
     .branch_flag_i(id_branch_flag),
     .branch_offset_i(id_branch_offset),
     .PC_i(id_PC),
+    .store_value_i(id_store_value),
     // .stall(stall),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),
@@ -184,7 +193,9 @@ alu exec(
     .mem_en_o(alu_mem_en_flag),
     .branch_flag_o(alu_branch_flag),
     .branch_offset_o(alu_branch_offset),
-    .PC_o(alu_PC)
+    .PC_o(alu_PC),
+    .mem_para_o(alu_mem_para),
+    .store_value_o(alu_store_value)
 );
 
 mem_access m_a(
@@ -192,8 +203,9 @@ mem_access m_a(
     .EN(alu_mem_en_flag),
     .rd_i(alu_rd),
     .address(alu_res),
+    .mem_para(alu_mem_para),
     .LOAD(alu_load_flag),
-    .value(mem_write_value),
+    .value(alu_store_value),
     .HRDATA(HRDATA),
     .alu_res(alu_res),
     .write_back(alu_write_back_en),

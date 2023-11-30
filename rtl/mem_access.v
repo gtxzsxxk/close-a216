@@ -3,7 +3,7 @@ module mem_access(
     input EN,
     input [4:0] rd_i,
     input [63:0] address,
-    input [2:0] funct3,
+    input [2:0] mem_para,
     input LOAD,
     input [63:0] value,
     input [63:0] HRDATA,
@@ -26,20 +26,25 @@ module mem_access(
 );
 
 reg refresh_en = 0;
+reg mem_write = 0;
 reg [63:0] tmp_res;
 
 always @ (posedge CLK) begin
     if(EN && !take_branch) begin
-        HWRITE <= ~LOAD;
         HADDR <= address;
         if(!LOAD) begin
-            HWDATA <= value;
+            mem_write <= 1;
+            tmp_res <= value;
+        end
+        else begin
+            mem_write <= 0;
         end
         HTRANS <= 1;
         refresh_en <= 1;
     end 
     else begin
         HTRANS <= 0;
+        mem_write <= 0;
         refresh_en <= 0;
         tmp_res <= alu_res;
     end
@@ -64,37 +69,60 @@ end
 
 always @ (negedge CLK) begin
     if(refresh_en) begin
-        if(funct3 == 3'b000) begin
-            /* LB */
-            res <= {{(56){HRDATA[7]}},HRDATA[7:0]};
+        if(!mem_write) begin
+            if(mem_para == 3'b000) begin
+                /* LB */
+                res <= {{(56){HRDATA[7]}},HRDATA[7:0]};
+            end
+            else if(mem_para == 3'b001) begin
+                /* LH */
+                res <= {{(48){HRDATA[15]}},HRDATA[15:0]};
+            end
+            else if(mem_para == 3'b010) begin
+                /* LW */
+                res <= {{(32){HRDATA[31]}},HRDATA[31:0]};
+            end
+            else if(mem_para == 3'b011) begin
+                /* LD */
+                res <= HRDATA[31:0];
+            end
+            else if(mem_para == 3'b100) begin
+                /* LBU */
+                res <= {{(56){1'b0}},HRDATA[7:0]};
+            end
+            else if(mem_para == 3'b101) begin
+                /* LHU */
+                res <= {{(48){1'b0}},HRDATA[15:0]};
+            end
+            else if(mem_para == 3'b110) begin
+                /* LWU */
+                res <= {{(32){1'b0}},HRDATA[31:0]};
+            end
+            HWRITE <= 0;
         end
-        else if(funct3 == 3'b001) begin
-            /* LH */
-            res <= {{(48){HRDATA[15]}},HRDATA[15:0]};
-        end
-        else if(funct3 == 3'b010) begin
-            /* LW */
-            res <= {{(32){HRDATA[31]}},HRDATA[31:0]};
-        end
-        else if(funct3 == 3'b011) begin
-            /* LD */
-            res <= HRDATA[31:0];
-        end
-        else if(funct3 == 3'b100) begin
-            /* LBU */
-            res <= {{(56){1'b0}},HRDATA[7:0]};
-        end
-        else if(funct3 == 3'b101) begin
-            /* LHU */
-            res <= {{(48){1'b0}},HRDATA[15:0]};
-        end
-        else if(funct3 == 3'b110) begin
-            /* LWU */
-            res <= {{(32){1'b0}},HRDATA[31:0]};
+        else begin
+            if(mem_para == 3'b000) begin
+                /* SB */
+                HWDATA <= (HRDATA & (~64'hff)) | (tmp_res & 64'hff);
+            end
+            else if(mem_para == 3'b001) begin
+                /* SH */
+                HWDATA <= (HRDATA & (~64'hffff)) | (tmp_res & 64'hffff);
+            end
+            else if(mem_para == 3'b010) begin
+                /* SW */
+                HWDATA <= (HRDATA & (~64'hffffffff)) | (tmp_res & 64'hffffffff);
+            end
+            else if(mem_para == 3'b011) begin
+                /* SD */
+                HWDATA <= tmp_res;
+            end
+            HWRITE <= 1;
         end
     end
     else begin
         res <= tmp_res;
+        HWRITE <= 0;
     end
 end
 

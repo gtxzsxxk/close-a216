@@ -5,6 +5,7 @@ module alu(
     input [63:0] op1,
     input [63:0] op2,
     input [2:0] funct3,
+    input [2:0] mem_para_i,
     input [6:0] funct7,
     input write_back,
     input load_flag_i,
@@ -14,6 +15,7 @@ module alu(
     input branch_flag_i,
     input [63:0] branch_offset_i,
     input [63:0] PC_i,
+    input [63:0] store_value_i,
     // input stall,
     output reg [63:0] res,
     output reg alu_write_back_en,
@@ -23,7 +25,8 @@ module alu(
     output reg branch_flag_o,
     output reg [63:0] branch_offset_o,
     output reg [63:0] PC_o,
-    output reg [2:0] funct3_o
+    output reg [2:0] mem_para_o,
+    output reg [63:0] store_value_o
 );
 
 wire [5:0] shift;
@@ -178,10 +181,12 @@ always @ (posedge CLK) begin
         mem_en_o <= mem_en_i;
     end
 
+    load_flag_o <= load_flag_i;
     branch_flag_o <= branch_flag_i;
     branch_offset_o <= branch_offset_i;
     PC_o <= PC_i;
-    funct3_o <= funct3;
+    mem_para_o <= mem_para_i;
+    store_value_o <= store_value_i;
     // end
 end
 
