@@ -84,7 +84,7 @@ always @ (negedge CLK) begin
             end
             else if(mem_para == 3'b011) begin
                 /* LD */
-                res <= HRDATA[31:0];
+                res <= HRDATA;
             end
             else if(mem_para == 3'b100) begin
                 /* LBU */
