@@ -94,7 +94,8 @@ rom[23] = 8'hfe;
     // rom[1] = 8'h00;
     // rom[0] = 8'h93;
     if(HADDR >= ROM_START && HADDR < (ROM_START + ROM_SIZE - 8)) begin
-        HRDATA <= {rom[HADDR-ROM_START + 7],
+        HRDATA <= {
+            rom[HADDR-ROM_START + 7],
             rom[HADDR-ROM_START + 6],
             rom[HADDR-ROM_START + 5],
             rom[HADDR-ROM_START + 4],
@@ -102,7 +103,10 @@ rom[23] = 8'hfe;
             rom[HADDR-ROM_START + 2],
             rom[HADDR-ROM_START + 1],
             rom[HADDR-ROM_START]
-            };
+        };
+    end
+    else begin
+        HRDATA <= 64'bz;
     end
 end
 

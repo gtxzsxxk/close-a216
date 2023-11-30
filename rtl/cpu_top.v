@@ -46,6 +46,13 @@ irom internal_rom(
     .HRDATA(HRDATA)
 );
 
+iram internal_ram(
+    .HWRITE(HWRITE),
+    .HADDR(PADDR),
+    .HWDATA(PDATA),
+    .HRDATA(HRDATA)
+);
+
 wire take_branch;
 wire [63:0] take_branch_offset;
 
