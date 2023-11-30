@@ -116,7 +116,7 @@ inst_decode i_d(
     .imm_flag(imm_flag),
     .mem_acc(mem_acc),
     .load_flag(load_flag),
-    .(word_inst),
+    .word_inst(word_inst),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
     .branch_flag(id_branch_flag),

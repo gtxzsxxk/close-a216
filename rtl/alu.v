@@ -32,10 +32,15 @@ assign shift = op2[5:0];
 
 wire [31:0] res_add_32;
 wire [31:0] res_sub_32;
+wire [31:0] res_sll_32;
+wire [31:0] res_srl_32;
+wire [31:0] res_sra_32;
 
 assign res_add_32 = $signed(op1[31:0]) + $signed(op2[31:0]);
 assign res_sub_32 = $signed(op1[31:0]) - $signed(op2[31:0]);
-
+assign res_sll_32 = op1[31:0] << shift[4:0];
+assign res_srl_32 = op1[31:0] >> shift[4:0];
+assign res_sra_32 = $signed(op1[31:0]) >>> shift[4:0];
 
 
 always @ (posedge CLK) begin
@@ -78,8 +83,14 @@ always @ (posedge CLK) begin
             end
         end
         else if(funct3 == 3'b001) begin
-        /* SLL */
-            res <= op1 << shift;
+            if(!word_inst) begin
+                /* SLL */
+                res <= op1 << shift;
+            end
+            else begin
+                /* SLLW */
+                res <= {{(32){res_sll_32[31]}},res_sll_32};
+            end
         end
         else if(funct3 == 3'b010) begin
         /* SLT */
@@ -106,11 +117,21 @@ always @ (posedge CLK) begin
         else if(funct3 == 3'b101) begin
             if(funct7 == 7'b0100000) begin
                 /* SRA */
-                res <= $signed(op1) >>> shift;
+                if(!word_inst) begin
+                    res <= $signed(op1) >>> shift;
+                end
+                else begin
+                    res <= {{(32){res_sra_32[31]}},res_sra_32};
+                end
             end
             else begin
                 /* SRL */
-                res <= op1 >> shift;
+                if(!word_inst) begin
+                    res <= op1 >> shift;
+                end
+                else begin
+                    res <= {{(32){res_srl_32[31]}},res_srl_32};
+                end
             end
         end
         else if(funct3 == 3'b110) begin
