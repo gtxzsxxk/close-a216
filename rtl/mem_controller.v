@@ -1,6 +1,7 @@
 module mem_controller(
     input HTRANS_1,
     input HTRANS_2,
+    input HRESET,
     input [63:0] HADDR_1,
     input [63:0] HADDR_2,
     input HWRITE_1,
@@ -10,7 +11,8 @@ module mem_controller(
     output reg [63:0] PADDR,
     output reg HWRITE,
     output reg [63:0] PDATA,
-    output reg stall
+    output reg stall,
+    output reg HRESET_o
 );
 
 always @ (*) begin
@@ -30,6 +32,7 @@ always @ (*) begin
         PDATA <= HWDATA_2;
     end
     stall <= HTRANS_1 & HTRANS_2;
+    HRESET_o <= HRESET;
 end
 
 endmodule

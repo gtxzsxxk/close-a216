@@ -24,10 +24,12 @@ assign stall = stall_from_pc_and_mem | stall_from_load;
 
 reg if_reset = 1;
 wire [31:0] inst;
+wire h_reset;
 
 mem_controller mc(
     .HTRANS_1(HTRANS_2),
     .HTRANS_2(HTRANS_1),
+    .HRESET(if_reset),
     .HADDR_1(HADDR_2),
     .HADDR_2(HADDR_1),
     .HWRITE_1(HWRITE_2),
@@ -37,7 +39,8 @@ mem_controller mc(
     .PADDR(PADDR),
     .HWRITE(HWRITE),
     .PDATA(PDATA),
-    .stall(stall_from_pc_and_mem)
+    .stall(stall_from_pc_and_mem),
+    .HRESET_o(h_reset)
 );
 
 irom internal_rom(
@@ -47,6 +50,7 @@ irom internal_rom(
 );
 
 iram internal_ram(
+    .HRESET(h_reset),
     .HWRITE(HWRITE),
     .HADDR(PADDR),
     .HWDATA(PDATA),
