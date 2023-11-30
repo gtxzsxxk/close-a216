@@ -26,10 +26,10 @@ module inst_decode(
     output reg [63:0] PC_o
 );
 
-parameter ALGORITHM = 7'b0110011;
-parameter ALGORITHM_64 = 7'b0111011;
-parameter ALGORITHM_IMM = 7'b0010011;
-parameter ALGORITHM_64_IMM = 7'b0011011;
+parameter ARITHMETIC = 7'b0110011;
+parameter ARITHMETIC_64 = 7'b0111011;
+parameter ARITHMETIC_IMM = 7'b0010011;
+parameter ARITHMETIC_64_IMM = 7'b0011011;
 parameter LOAD = 7'b0000011;
 parameter BRANCH = 7'b1100011;
 
@@ -116,14 +116,15 @@ always @ (posedge CLK or negedge reset) begin
         end
         registers[0] <= 64'd0;
 
-        if(inst[6:0] == ALGORITHM || 
+        if(inst[6:0] == ARITHMETIC || 
             inst[6:0] == BRANCH ||
-            inst[6:0] == ALGORITHM_64) begin
+            inst[6:0] == ARITHMETIC_64) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
         end
-        else if(inst[6:0] == ALGORITHM_IMM) begin
+        else if(inst[6:0] == ARITHMETIC_IMM ||
+            inst[6:0] == ARITHMETIC_IMM_64) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], 0, 1);
             instruction <= inst_imm;
@@ -140,8 +141,8 @@ always @ (posedge CLK or negedge reset) begin
 end
 
 always @ (negedge CLK) begin
-    if(instruction[6:0] == ALGORITHM ||
-        instruction[6:0] == ALGORITHM_64) begin
+    if(instruction[6:0] == ARITHMETIC ||
+        instruction[6:0] == ARITHMETIC_64) begin
         rd <= instruction[11:7];
         funct3 <= instruction[14:12];
         rs1 <= instruction[19:15];
@@ -154,9 +155,10 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= instruction[6:0] == ALGORITHM_64;
+        word_inst <= instruction[6:0] == ARITHMETIC_64;
     end
-    else if(instruction[6:0] == ALGORITHM_IMM) begin
+    else if(instruction[6:0] == ARITHMETIC_IMM ||
+        instruction[6:0] == ARITHMETIC_IMM_64) begin
         rd <= instruction[11:7];
         funct3 <= instruction[14:12];
         rs1 <= instruction[19:15];
@@ -168,6 +170,7 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 1;
         branch_flag <= 0;
+        word_inst <= instruction[6:0] == ARITHMETIC_IMM_64;
     end
     else if(instruction[6:0] == LOAD) begin
         rd <= instruction[11:7];
@@ -181,6 +184,7 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 1;
         branch_flag <= 0;
+        word_inst <= 0;
     end
     else if(instruction[6:0] == BRANCH) begin
         branch_offset <= {{(51){instruction[31]}},instruction[31],
@@ -195,6 +199,7 @@ always @ (negedge CLK) begin
         write_back <= 0;
         imm_flag <= 0;
         branch_flag <= 1;
+        word_inst <= 0;
     end
     else begin
         funct3 <= 0;
@@ -207,6 +212,7 @@ always @ (negedge CLK) begin
         write_back <= 0;
         imm_flag <= 0;
         branch_flag <= 0;
+        word_inst <= 0;
     end
 end
 
