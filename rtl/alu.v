@@ -9,6 +9,7 @@ module alu(
     input write_back,
     input load_flag_i,
     input mem_en_i,
+    input word_inst,
     input take_branch,
     input branch_flag_i,
     input [63:0] branch_offset_i,
@@ -29,6 +30,14 @@ wire [5:0] shift;
 
 assign shift = op2[5:0];
 
+wire [31:0] res_add_32;
+wire [31:0] res_sub_32;
+
+assign res_add_32 = $signed(op1[31:0]) + $signed(op2[31:0]);
+assign res_sub_32 = $signed(op1[31:0]) - $signed(op2[31:0]);
+
+
+
 always @ (posedge CLK) begin
     // if(stall) begin
     //     /* addi x0, x0, 0 */
@@ -41,15 +50,30 @@ always @ (posedge CLK) begin
     if(!branch_flag_i) begin
         if(funct3 == 3'b000) begin
         /* ADD SUB */
-            if(imm) begin
-                res <= op1 + op2;
-            end
-            else begin
-                if(funct7 == 7'b0100000) begin
-                    res <= op1 - op2;
+            if(!word_inst) begin
+                if(imm) begin
+                    res <= {{(32){res_add_32[31]}},res_add_32};
                 end
                 else begin
+                    if(funct7 == 7'b0100000) begin
+                        res <= {{(32){res_sub_32[31]}},res_sub_32};
+                    end
+                    else begin
+                        res <= {{(32){res_add_32[31]}},res_add_32};
+                    end
+                end
+            end
+            else begin
+                if(imm) begin
                     res <= op1 + op2;
+                end
+                else begin
+                    if(funct7 == 7'b0100000) begin
+                        res <= op1 - op2;
+                    end
+                    else begin
+                        res <= op1 + op2;
+                    end
                 end
             end
         end

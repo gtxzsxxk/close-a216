@@ -93,6 +93,8 @@ wire id_stall = stall_from_pc_and_mem | take_branch;
 
 wire [63:0] id_PC;
 
+wire word_inst;
+
 inst_decode i_d(
     .CLK(CLK),
     .reset(if_reset),
@@ -114,6 +116,7 @@ inst_decode i_d(
     .imm_flag(imm_flag),
     .mem_acc(mem_acc),
     .load_flag(load_flag),
+    .(word_inst),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
     .branch_flag(id_branch_flag),
@@ -161,6 +164,7 @@ alu exec(
     .write_back(id_write_back_en),
     .load_flag_i(load_flag),
     .mem_en_i(mem_acc),
+    .word_inst(word_inst),
     .take_branch(take_branch),
     .branch_flag_i(id_branch_flag),
     .branch_offset_i(id_branch_offset),

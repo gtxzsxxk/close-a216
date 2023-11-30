@@ -19,6 +19,7 @@ module inst_decode(
     output reg imm_flag,
     output reg mem_acc,
     output reg load_flag,
+    output reg word_inst, /* work on 32bits */
     output reg stall_raise,
     output reg [63:0] branch_offset,
     output reg branch_flag,
@@ -116,7 +117,8 @@ always @ (posedge CLK or negedge reset) begin
         registers[0] <= 64'd0;
 
         if(inst[6:0] == ALGORITHM || 
-            inst[6:0] == BRANCH) begin
+            inst[6:0] == BRANCH ||
+            inst[6:0] == ALGORITHM_64) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
@@ -138,7 +140,8 @@ always @ (posedge CLK or negedge reset) begin
 end
 
 always @ (negedge CLK) begin
-    if(instruction[6:0] == ALGORITHM) begin
+    if(instruction[6:0] == ALGORITHM ||
+        instruction[6:0] == ALGORITHM_64) begin
         rd <= instruction[11:7];
         funct3 <= instruction[14:12];
         rs1 <= instruction[19:15];
@@ -151,6 +154,7 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
+        word_inst <= instruction[6:0] == ALGORITHM_64;
     end
     else if(instruction[6:0] == ALGORITHM_IMM) begin
         rd <= instruction[11:7];
