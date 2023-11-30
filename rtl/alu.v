@@ -58,7 +58,7 @@ always @ (posedge CLK) begin
     if(!branch_flag_i) begin
         if(funct3 == 3'b000) begin
         /* ADD SUB */
-            if(!word_inst) begin
+            if(word_inst) begin
                 if(imm) begin
                     res <= {{(32){res_add_32[31]}},res_add_32};
                 end
