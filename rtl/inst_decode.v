@@ -26,7 +26,9 @@ module inst_decode(
 );
 
 parameter ALGORITHM = 7'b0110011;
+parameter ALGORITHM_64 = 7'0111011;
 parameter ALGORITHM_IMM = 7'b0010011;
+parameter ALGORITHM_64_IMM = 7'b0011011;
 parameter LOAD = 7'b0000011;
 parameter BRANCH = 7'b1100011;
 
@@ -165,7 +167,7 @@ always @ (negedge CLK) begin
     end
     else if(instruction[6:0] == LOAD) begin
         rd <= instruction[11:7];
-        funct3 <= 3'b000;
+        funct3 <= instruction[14:12];
         rs1 <= instruction[19:15];
         imm20 <= instruction[31:20];
         op1 <= get_register_value(instruction[19:15]);

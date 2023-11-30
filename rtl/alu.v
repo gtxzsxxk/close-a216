@@ -21,7 +21,8 @@ module alu(
     output reg mem_en_o,
     output reg branch_flag_o,
     output reg [63:0] branch_offset_o,
-    output reg [63:0] PC_o
+    output reg [63:0] PC_o,
+    output reg [2:0] funct3_o
 );
 
 wire [5:0] shift;
@@ -135,6 +136,7 @@ always @ (posedge CLK) begin
     branch_flag_o <= branch_flag_i;
     branch_offset_o <= branch_offset_i;
     PC_o <= PC_i;
+    funct3_o <= funct3;
     // end
 end
 

@@ -3,6 +3,7 @@ module mem_access(
     input EN,
     input [4:0] rd_i,
     input [63:0] address,
+    input [2:0] funct3,
     input LOAD,
     input [63:0] value,
     input [63:0] HRDATA,
@@ -63,7 +64,34 @@ end
 
 always @ (negedge CLK) begin
     if(refresh_en) begin
-        res <= HRDATA;
+        if(funct3 == 3'b000) begin
+            /* LB */
+            res <= {{(56){HRDATA[7]}},HRDATA[7:0]};
+        end
+        else if(funct3 == 3'b001) begin
+            /* LH */
+            res <= {{(48){HRDATA[15]}},HRDATA[15:0]};
+        end
+        else if(funct3 == 3'b010) begin
+            /* LW */
+            res <= {{(32){HRDATA[31]}},HRDATA[31:0]};
+        end
+        else if(funct3 == 3'b011) begin
+            /* LD */
+            res <= HRDATA[31:0];
+        end
+        else if(funct3 == 3'b100) begin
+            /* LBU */
+            res <= {{(56){1'b0}},HRDATA[7:0]};
+        end
+        else if(funct3 == 3'b101) begin
+            /* LHU */
+            res <= {{(48){1'b0}},HRDATA[15:0]};
+        end
+        else if(funct3 == 3'b110) begin
+            /* LWU */
+            res <= {{(32){1'b0}},HRDATA[31:0]};
+        end
     end
     else begin
         res <= tmp_res;
