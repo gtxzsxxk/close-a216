@@ -27,6 +27,7 @@ module mem_access(
 
 reg refresh_en = 0;
 reg mem_write = 0;
+reg [2:0] mem_para_local;
 reg [63:0] tmp_res;
 
 always @ (posedge CLK) begin
@@ -65,55 +66,56 @@ always @ (posedge CLK) begin
         take_branch <= 0;
     end
     PC_o <= PC_i;
+    mem_para_local <= mem_para;
 end
 
 always @ (negedge CLK) begin
     if(refresh_en) begin
         if(!mem_write) begin
-            if(mem_para == 3'b000) begin
+            if(mem_para_local == 3'b000) begin
                 /* LB */
                 res <= {{(56){HRDATA[7]}},HRDATA[7:0]};
             end
-            else if(mem_para == 3'b001) begin
+            else if(mem_para_local == 3'b001) begin
                 /* LH */
                 res <= {{(48){HRDATA[15]}},HRDATA[15:0]};
             end
-            else if(mem_para == 3'b010) begin
+            else if(mem_para_local == 3'b010) begin
                 /* LW */
                 res <= {{(32){HRDATA[31]}},HRDATA[31:0]};
             end
-            else if(mem_para == 3'b011) begin
+            else if(mem_para_local == 3'b011) begin
                 /* LD */
                 res <= HRDATA;
             end
-            else if(mem_para == 3'b100) begin
+            else if(mem_para_local == 3'b100) begin
                 /* LBU */
                 res <= {{(56){1'b0}},HRDATA[7:0]};
             end
-            else if(mem_para == 3'b101) begin
+            else if(mem_para_local == 3'b101) begin
                 /* LHU */
                 res <= {{(48){1'b0}},HRDATA[15:0]};
             end
-            else if(mem_para == 3'b110) begin
+            else if(mem_para_local == 3'b110) begin
                 /* LWU */
                 res <= {{(32){1'b0}},HRDATA[31:0]};
             end
             HWRITE <= 0;
         end
         else begin
-            if(mem_para == 3'b000) begin
+            if(mem_para_local == 3'b000) begin
                 /* SB */
                 HWDATA <= (HRDATA & (~64'hff)) | (tmp_res & 64'hff);
             end
-            else if(mem_para == 3'b001) begin
+            else if(mem_para_local == 3'b001) begin
                 /* SH */
                 HWDATA <= (HRDATA & (~64'hffff)) | (tmp_res & 64'hffff);
             end
-            else if(mem_para == 3'b010) begin
+            else if(mem_para_local == 3'b010) begin
                 /* SW */
                 HWDATA <= (HRDATA & (~64'hffffffff)) | (tmp_res & 64'hffffffff);
             end
-            else if(mem_para == 3'b011) begin
+            else if(mem_para_local == 3'b011) begin
                 /* SD */
                 HWDATA <= tmp_res;
             end
