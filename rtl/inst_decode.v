@@ -7,6 +7,10 @@ module inst_decode(
     input wb_en,
     input stall,
     input [63:0] PC_i,
+    input [4:0] alu_rd,
+    input [63:0] jalr_forwarding_alu_op1, /* connect with alu res */
+    input [4:0] mem_rd,
+    input [63:0] jalr_forwarding_mem_op1, /* connect with mem res */
     output reg [4:0] rd,
     output reg [4:0] rs1,
     output reg [4:0] rs2,
@@ -48,6 +52,12 @@ input [4:0] idx;
 begin
     if(idx == wb_rd && wb_en && idx != 0) begin
         get_register_value = wb_value;
+    end
+    else if(inst[6:0] == JALR && idx == alu_rd) begin
+        get_register_value = jalr_forwarding_alu_op1;
+    end
+    else if(inst[6:0] == JALR && idx == mem_rd) begin
+        get_register_value = jalr_forwarding_mem_op1;
     end
     else begin
         get_register_value = registers[idx];
@@ -107,6 +117,9 @@ begin
                 judge_stall = 0;
             end
         end
+    end
+    else if(inst[6:0] == JALR && rd == cur_rs1) begin
+        judge_stall = 1;
     end
     else begin
         judge_stall = 0;

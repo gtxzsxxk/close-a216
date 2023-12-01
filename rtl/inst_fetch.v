@@ -19,8 +19,22 @@ parameter JALR = 7'b1100111;
 reg addr_mux = 0;
 
 reg [63:0] PC_tmp;
+reg [63:0] PC_jalr;
+reg jalr_jump = 0;
 
 assign HADDR = addr_mux ? PC_i : PC_tmp;
+
+function [63:0] get_pc;
+    input use_jalr_pc;
+    begin
+        if(use_jalr_pc) begin
+            get_pc = PC_jalr;
+        end
+        else begin
+            get_pc = PC_tmp;
+        end
+    end
+endfunction
 
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
@@ -30,7 +44,7 @@ always @ (posedge CLK or negedge reset) begin
     end
     else begin
         if(stall) begin
-            PC_tmp <= PC_tmp;
+            PC_tmp <= get_pc(jalr_jump);
             HTRANS <= 1;
             addr_mux <= 0;
         end
@@ -41,7 +55,7 @@ always @ (posedge CLK or negedge reset) begin
             end
             else if(inst[6:0] == JAL) begin
                 /* if the last instruction is JALx, jump now */
-                PC_tmp <= PC_tmp + {{(43){inst[31]}},inst[31],inst[19:12],
+                PC_tmp <= get_pc(jalr_jump) + {{(43){inst[31]}},inst[31],inst[19:12],
                     inst[20],inst[30:21],1'b0};
                 addr_mux <= 0;
             end
@@ -49,7 +63,7 @@ always @ (posedge CLK or negedge reset) begin
                 addr_mux <= 1;
             end
             else begin
-                PC_tmp <= PC_tmp + 4;
+                PC_tmp <= get_pc(jalr_jump) + 4;
                 addr_mux <= 0;
             end
             HTRANS <= 1;
@@ -63,6 +77,13 @@ always @ (negedge CLK) begin
     end
     else begin
         inst <= HRDATA;
+        if(inst[6:0] == JALR) begin
+            PC_jalr <= PC_i;
+            jalr_jump <= 1;
+        end
+        else begin
+            jalr_jump <= 0;
+        end
     end
 end
 

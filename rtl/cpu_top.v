@@ -110,6 +110,13 @@ wire word_inst;
 wire [2:0] id_mem_para;
 wire [63:0] id_store_value;
 
+wire [4:0] alu_rd;
+wire alu_load_flag;
+wire alu_mem_en_flag;
+
+wire [4:0] mem_rd;
+wire [63:0] mem_res;
+
 inst_decode i_d(
     .CLK(CLK),
     .reset(if_reset),
@@ -119,6 +126,10 @@ inst_decode i_d(
     .wb_en(wb_en),
     .stall(id_stall),
     .PC_i(HADDR_1),
+    .alu_rd(alu_rd),
+    .jalr_forwarding_alu_op1(alu_res),
+    .mem_rd(mem_rd),
+    .jalr_forwarding_mem_op1(mem_res),
     .rd(rd),
     .rs1(rs1),
     .rs2(rs2),
@@ -141,15 +152,8 @@ inst_decode i_d(
     .store_value(id_store_value)
 );
 
-wire [4:0] alu_rd;
-wire alu_load_flag;
-wire alu_mem_en_flag;
-
 wire [63:0] op1_fwd;
 wire [63:0] op2_fwd;
-
-wire [4:0] mem_rd;
-wire [63:0] mem_res;
 
 wire [63:0] alu_branch_offset;
 wire alu_branch_flag;
