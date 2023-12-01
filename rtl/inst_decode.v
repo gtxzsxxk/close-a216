@@ -42,6 +42,8 @@ parameter BRANCH = 7'b1100011;
 parameter STORE = 7'b0100011;
 parameter JAL = 7'b1101111;
 parameter JALR = 7'b1100111;
+parameter LUI = 7'b0110111;
+parameter AUIPC = 7'b0010111;
 
 reg [63:0] registers[31:0];
 
@@ -163,7 +165,9 @@ always @ (posedge CLK or negedge reset) begin
             stall_raise <= 0;
             instruction <= inst_load;
         end
-        else if(inst[6:0] == JAL) begin
+        else if(inst[6:0] == JAL ||
+                inst[6:0] == LUI ||
+                inst[6:0] == AUIPC) begin
             stall_raise <= 0;
             instruction <= inst_load;
         end
@@ -287,6 +291,21 @@ always @ (negedge CLK) begin
         op1 <= PC_o;
         op2 <= 64'h4;
 
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 1;
+        imm_flag <= 0;
+        branch_flag <= 0;
+        word_inst <= 0;
+    end
+    else if(instruction[6:0] == LUI ||
+            instruction[6:0] == AUIPC) begin
+        rd <= instruction[11:7];
+        /* let the alu calculate the address. 
+         * Here funct3 should be add */
+        funct3 <= 3'b000;
+        op1 <= {{(32){instruction[31]}},instruction[31:12],12'b0};
+        op2 <= instruction[6:0] == AUIPC ? PC_o : 0;
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
