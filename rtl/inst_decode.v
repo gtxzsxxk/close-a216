@@ -78,8 +78,8 @@ wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(instruction[6:0],
 
 wire [31:0] inst_load = get_inst(inst,stall);
 
-wire [63:0] jalr_target_addr = get_register_value(instruction[19:15]) +
-                    {{(52){instruction[31]}},instruction[31:20]};
+wire [63:0] jalr_target_addr = get_register_value(inst[19:15]) +
+                    {{(52){inst[31]}},inst[31:20]};
 
 
 /* judge whether to stall for the last load */
