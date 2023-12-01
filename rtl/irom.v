@@ -12,54 +12,34 @@ reg [7:0] rom[ROM_SIZE-1:0];
 integer rst_i;
 
 always @(*) begin
-    for(rst_i=36;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
+    for(rst_i=20;rst_i<ROM_SIZE;rst_i=rst_i+1) begin
         rom[rst_i] <= rst_i;
     end
 
-rom[0] = 8'h83;
-rom[1] = 8'h30;
-rom[2] = 8'h00;
-rom[3] = 8'h03;
+rom[0] = 8'h93;
+rom[1] = 8'h00;
+rom[2] = 8'h80;
+rom[3] = 8'h3e;
 
-rom[4] = 8'h93;
-rom[5] = 8'h80;
-rom[6] = 8'h10;
+rom[4] = 8'h6f;
+rom[5] = 8'h02;
+rom[6] = 8'h80;
 rom[7] = 8'h00;
 
-rom[8] = 8'h93;
-rom[9] = 8'h01;
+rom[8] = 8'h13;
+rom[9] = 8'h81;
 rom[10] = 8'h00;
-rom[11] = 8'h40;
+rom[11] = 8'h7d;
 
 rom[12] = 8'h93;
-rom[13] = 8'h81;
-rom[14] = 8'h01;
-rom[15] = 8'h40;
+rom[13] = 8'h80;
+rom[14] = 8'h80;
+rom[15] = 8'h3e;
 
-rom[16] = 8'h93;
-rom[17] = 8'h81;
-rom[18] = 8'h01;
-rom[19] = 8'h40;
-
-rom[20] = 8'h93;
-rom[21] = 8'h81;
-rom[22] = 8'h01;
-rom[23] = 8'h40;
-
-rom[24] = 8'h23;
-rom[25] = 8'h80;
-rom[26] = 8'h11;
-rom[27] = 8'h00;
-
-rom[28] = 8'h03;
-rom[29] = 8'h31;
-rom[30] = 8'h00;
-rom[31] = 8'h03;
-
-rom[32] = 8'h03;
-rom[33] = 8'hb2;
-rom[34] = 8'h01;
-rom[35] = 8'h00;
+rom[16] = 8'h67;
+rom[17] = 8'h00;
+rom[18] = 8'h02;
+rom[19] = 8'h00;
 
     // /* add x2,x2,x1 */
     // rom[15] = 8'h00;

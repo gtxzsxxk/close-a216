@@ -60,8 +60,9 @@ iram internal_ram(
 wire take_branch;
 wire [63:0] take_branch_offset;
 
-wire [63:0] if_PC;
 wire [63:0] mem_PC;
+
+wire [63:0] jalr_offset;
 
 inst_fetch i_f(
     .CLK(CLK),
@@ -70,11 +71,11 @@ inst_fetch i_f(
     .take_branch(take_branch),
     .branch_PC(mem_PC),
     .take_branch_offset(take_branch_offset),
+    .PC_i(jalr_offset),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
     .inst(inst),
-    .HTRANS(HTRANS_1),
-    .PC(if_PC)
+    .HTRANS(HTRANS_1)
 );
 
 wire [4:0] rd;
@@ -117,7 +118,7 @@ inst_decode i_d(
     .wb_value(wb_value),
     .wb_en(wb_en),
     .stall(id_stall),
-    .PC_i(if_PC),
+    .PC_i(HADDR_1),
     .rd(rd),
     .rs1(rs1),
     .rs2(rs2),
@@ -134,6 +135,7 @@ inst_decode i_d(
     .word_inst(word_inst),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
+    .jalr_offset(jalr_offset),
     .branch_flag(id_branch_flag),
     .PC_o(id_PC),
     .store_value(id_store_value)

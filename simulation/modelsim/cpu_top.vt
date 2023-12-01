@@ -44,7 +44,8 @@ cpu_top i1 (
 initial                                                
 begin                                                  
 // code that executes only once                        
-// insert code here --> begin                          
+// insert code here --> begin        
+#1 CLK = 0;                  
 #1 RESET = 1;
 #1 RESET = 0;
 #1 RESET = 1;

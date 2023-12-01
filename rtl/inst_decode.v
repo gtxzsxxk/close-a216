@@ -23,6 +23,7 @@ module inst_decode(
     output reg word_inst, /* work on 32bits */
     output reg stall_raise,
     output reg [63:0] branch_offset,
+    output reg [63:0] jalr_offset,
     output reg branch_flag,
     output reg [63:0] PC_o,
     output reg [63:0] store_value
@@ -39,6 +40,7 @@ parameter JAL = 7'b1101111;
 parameter JALR = 7'b1100111;
 
 reg [63:0] registers[31:0];
+
 integer rst_i;
 
 function [63:0] get_register_value;
@@ -75,6 +77,9 @@ wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(instruction[6:0],
                 inst[19:15], 0, 1));
 
 wire [31:0] inst_load = get_inst(inst,stall);
+
+wire [63:0] jalr_target_addr = get_register_value(instruction[19:15]) +
+                    {{(52){instruction[31]}},instruction[31:20]};
 
 
 /* judge whether to stall for the last load */
@@ -131,10 +136,15 @@ always @ (posedge CLK or negedge reset) begin
             instruction <= inst_two_op;
         end
         else if(inst[6:0] == ARITHMETIC_IMM ||
-            inst[6:0] == ARITHMETIC_IMM_64) begin
+            inst[6:0] == ARITHMETIC_IMM_64 ||
+            inst[6:0] == JALR) begin
             stall_raise <= judge_stall(instruction[6:0],
                 inst[19:15], 0, 1);
             instruction <= inst_imm;
+            if(inst[6:0] == JALR) begin
+                /* immediately compute the address to jump */
+                jalr_offset <= {jalr_target_addr[63:1], 1'b0};
+            end
         end
         else if(inst[6:0] == LOAD) begin
             stall_raise <= 0;
@@ -255,6 +265,21 @@ always @ (negedge CLK) begin
         branch_flag <= 0;
         word_inst <= 0;
         mem_para <= 0;
+    end
+    else if(instruction[6:0] == JALR) begin
+        rd <= instruction[11:7];
+        /* let the alu calculate the PC+4 address. 
+         * Here funct3 should be add */
+        funct3 <= 3'b000;
+        op1 <= PC_i;
+        op2 <= 64'h4;
+
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 1;
+        imm_flag <= 0;
+        branch_flag <= 0;
+        word_inst <= 0;
     end
     else begin
         funct3 <= 0;
