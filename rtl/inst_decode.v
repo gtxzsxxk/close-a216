@@ -253,7 +253,7 @@ always @ (negedge CLK) begin
          * Here funct3 should be add */
         funct3 <= 3'b000;
         /* use alu to calc rd */
-        op1 <= PC_i;
+        op1 <= PC_o;
         op2 <= 64'h4;
         /* Here the decoder only cares about write back the rd
          * jump will be impl in inst fetch
@@ -271,7 +271,7 @@ always @ (negedge CLK) begin
         /* let the alu calculate the PC+4 address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
-        op1 <= PC_i;
+        op1 <= PC_o;
         op2 <= 64'h4;
 
         mem_acc <= 0;
