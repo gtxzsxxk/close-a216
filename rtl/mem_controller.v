@@ -31,7 +31,7 @@ always @ (*) begin
         HWRITE <= HWRITE_2;
         PDATA <= HWDATA_2;
     end
-    stall <= HTRANS_1 & HTRANS_2;
+    stall <= HTRANS_1 & HTRANS_2 & HRESET;
     HRESET_o <= HRESET;
 end
 

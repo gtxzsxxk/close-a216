@@ -205,6 +205,7 @@ alu exec(
 mem_access m_a(
     .CLK(CLK),
     .EN(alu_mem_en_flag),
+    .RESET(if_reset),
     .rd_i(alu_rd),
     .address(alu_res),
     .mem_para(alu_mem_para),

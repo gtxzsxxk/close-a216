@@ -12,6 +12,9 @@ module inst_fetch(
     output reg [63:0] PC
 );
 
+parameter JAL = 7'b1101111;
+parameter JALR = 7'b1100111;
+
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
         PC <= 64'b0;
@@ -29,6 +32,11 @@ always @ (posedge CLK or negedge reset) begin
                 PC <= branch_PC + take_branch_offset;
                 HADDR <= branch_PC + take_branch_offset;
             end
+            // else if(inst[6:0] == JAL ||
+            //         inst[6:0] == JAlR) begin
+            //     branch_offset <= {{(43){inst[31]}},inst[31],inst[19:12],
+            //         inst[20],inst[30:21],1'b0};
+            // end
             else begin
                 PC <= PC + 4;
                 HADDR <= PC + 4;

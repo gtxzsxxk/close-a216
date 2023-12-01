@@ -35,6 +35,8 @@ parameter ARITHMETIC_IMM_64 = 7'b0011011;
 parameter LOAD = 7'b0000011;
 parameter BRANCH = 7'b1100011;
 parameter STORE = 7'b0100011;
+parameter JAL = 7'b1101111;
+parameter JALR = 7'b1100111;
 
 reg [63:0] registers[31:0];
 integer rst_i;
@@ -112,6 +114,7 @@ always @ (posedge CLK or negedge reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
             registers[rst_i] <= 64'd0;
         end
+        stall_raise <= 0;
     end
     else begin
         if(wb_en && wb_rd != 0) begin
@@ -134,6 +137,10 @@ always @ (posedge CLK or negedge reset) begin
             instruction <= inst_imm;
         end
         else if(inst[6:0] == LOAD) begin
+            stall_raise <= 0;
+            instruction <= inst_load;
+        end
+        else if(inst[6:0] == JAL) begin
             stall_raise <= 0;
             instruction <= inst_load;
         end
@@ -227,6 +234,25 @@ always @ (negedge CLK) begin
         write_back <= 0;
         imm_flag <= 0;
         branch_flag <= 1;
+        word_inst <= 0;
+        mem_para <= 0;
+    end
+    else if(instruction[6:0] == JAL) begin
+        rd <= instruction[11:7];
+        /* let the alu calculate the address. 
+         * Here funct3 should be add */
+        funct3 <= 3'b000;
+        /* use alu to calc rd */
+        op1 <= PC_i;
+        op2 <= 64'h4;
+        /* Here the decoder only cares about write back the rd
+         * jump will be impl in inst fetch
+         */
+        mem_acc <= 0;
+        load_flag <= 0;
+        write_back <= 1;
+        imm_flag <= 0;
+        branch_flag <= 0;
         word_inst <= 0;
         mem_para <= 0;
     end

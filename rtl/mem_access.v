@@ -1,6 +1,7 @@
 module mem_access(
     input CLK,
     input EN,
+    input RESET,
     input [4:0] rd_i,
     input [63:0] address,
     input [2:0] mem_para,
@@ -30,43 +31,49 @@ reg mem_write = 0;
 reg [2:0] mem_para_local;
 reg [63:0] tmp_res;
 
-always @ (posedge CLK) begin
-    if(EN && !take_branch) begin
-        HADDR <= address;
-        if(!LOAD) begin
-            mem_write <= 1;
-            tmp_res <= value;
+always @ (posedge CLK or negedge RESET) begin
+    if(!RESET) begin
+        take_branch <= 0;
+        HTRANS <= 0;
+    end
+    else begin
+        if(EN && !take_branch) begin
+            HADDR <= address;
+            if(!LOAD) begin
+                mem_write <= 1;
+                tmp_res <= value;
+            end
+            else begin
+                mem_write <= 0;
+            end
+            HTRANS <= 1;
+            refresh_en <= 1;
+        end 
+        else begin
+            HTRANS <= 0;
+            mem_write <= 0;
+            refresh_en <= 0;
+            tmp_res <= alu_res;
+        end
+        if(take_branch) begin
+            rd_o <= 0;
+            mem_write_back_en <= 0;
         end
         else begin
-            mem_write <= 0;
+            rd_o <= rd_i;
+            mem_write_back_en <= write_back;
         end
-        HTRANS <= 1;
-        refresh_en <= 1;
-    end 
-    else begin
-        HTRANS <= 0;
-        mem_write <= 0;
-        refresh_en <= 0;
-        tmp_res <= alu_res;
+        branch_offset_o <= branch_offset_i;
+        if(branch_flag_i && alu_res == 64'b1) begin
+            /* take the branch */
+            take_branch <= 1;
+        end
+        else begin
+            take_branch <= 0;
+        end
+        PC_o <= PC_i;
+        mem_para_local <= mem_para;
     end
-    if(take_branch) begin
-        rd_o <= 0;
-        mem_write_back_en <= 0;
-    end
-    else begin
-        rd_o <= rd_i;
-        mem_write_back_en <= write_back;
-    end
-    branch_offset_o <= branch_offset_i;
-    if(branch_flag_i && alu_res == 64'b1) begin
-        /* take the branch */
-        take_branch <= 1;
-    end
-    else begin
-        take_branch <= 0;
-    end
-    PC_o <= PC_i;
-    mem_para_local <= mem_para;
 end
 
 always @ (negedge CLK) begin
