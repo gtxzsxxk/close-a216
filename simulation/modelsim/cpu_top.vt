@@ -81,7 +81,6 @@ begin
 fd = $fopen("test_1.hex","r");
 while (!$feof(fd)) begin
 	$fscanf(fd,"%s",hex_buffer_inv);
-	$display("hex_inv=%s, [344-8+:8]=%d",hex_buffer_inv,hex_buffer_inv[344-8+:8]);
 	for(rd_inv=344-8;rd_inv>=0;rd_inv=rd_inv-8) begin
 		if(hex_buffer_inv[rd_inv+:8]!=0 && !inv_flag) begin
 			hex_msb=rd_inv;
@@ -89,7 +88,6 @@ while (!$feof(fd)) begin
 		end
 	end
 	inv_flag=0;
-	$display("hex_msb=%d",hex_msb);
 	for(rd_inv=0;rd_inv<344;rd_inv=rd_inv+1) begin
 		hex_buffer[rd_inv*8+:8] = hex_buffer_inv[(hex_msb - rd_inv*8)+:8];
 	end
@@ -98,10 +96,10 @@ while (!$feof(fd)) begin
 		(char2int(hex_buffer[5*8+:8]))*16 + (char2int(hex_buffer[6*8+:8]))*1;
 	$display("fetch line %s, [0]=%d[1]=%d[2]=%d, len %d, addr %d",hex_buffer,hex_buffer[0*8+:8],hex_buffer[1*8+:8],hex_buffer[2*8+:8],hex_data_len,hex_data_addr);
 	for(cp_cnt=0;cp_cnt<hex_data_len;cp_cnt=cp_cnt+1) begin
-		i1.internal_rom.rom[hex_data_addr+cp_cnt] = hex_buffer[(9+cp_cnt*2)*8-1-:8]*16 +
-			hex_buffer[(10+cp_cnt*2)*8-1-:8];
-		$display("Writing Rom @ 0x%8x, value = 0x%2x",hex_data_addr+cp_cnt,hex_buffer[(9+cp_cnt*2)*8-1-:8]*16 +
-			hex_buffer[(10+cp_cnt*2)*8-1-:8]);   
+		i1.internal_rom.rom[hex_data_addr+cp_cnt] = char2int(hex_buffer[(9+cp_cnt*2)*8+:8])*16 +
+			char2int(hex_buffer[(10+cp_cnt*2)*8+:8]);
+		$display("Writing Rom @ 0x%8x, value = 0x%02x",hex_data_addr+cp_cnt,char2int(hex_buffer[(9+cp_cnt*2)*8+:8])*16 +
+			char2int(hex_buffer[(10+cp_cnt*2)*8+:8]));   
 	end
 end
 $fclose(fd);
