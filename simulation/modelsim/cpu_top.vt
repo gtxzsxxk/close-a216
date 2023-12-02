@@ -41,6 +41,32 @@ cpu_top i1 (
 	.CLK(CLK),
 	.RESET(RESET)
 );
+
+integer hex_msb; /* hex最高位 */
+integer fd;
+integer inv_flag=0;
+integer rd_inv;
+integer cp_cnt;
+integer hex_data_addr;
+integer hex_data_len;
+reg [343:0] hex_buffer;
+reg [343:0] hex_buffer_inv;
+
+function [7:0] char2int;
+input [7:0] char;
+begin
+	if(char >= 48 && char <= 57) begin
+		char2int = char - 48;
+	end
+	else if(char >= 65 && char <= 70) begin
+		char2int = 10 + char - 65;
+	end
+	else if(char >= 97 && char <= 102) begin
+		char2int = 10 + char - 97;
+	end
+end
+endfunction
+
 initial                                                
 begin                                                  
 // code that executes only once                        
@@ -49,6 +75,37 @@ begin
 #1 RESET = 1;
 #1 RESET = 0;
 #1 RESET = 1;
+
+/* Read data from intel hex file */
+
+fd = $fopen("test_1.hex","r");
+while (!$feof(fd)) begin
+	$fscanf(fd,"%s",hex_buffer_inv);
+	$display("hex_inv=%s, [344-8+:8]=%d",hex_buffer_inv,hex_buffer_inv[344-8+:8]);
+	for(rd_inv=344-8;rd_inv>=0;rd_inv=rd_inv-8) begin
+		if(hex_buffer_inv[rd_inv+:8]!=0 && !inv_flag) begin
+			hex_msb=rd_inv;
+			inv_flag=1;
+		end
+	end
+	inv_flag=0;
+	$display("hex_msb=%d",hex_msb);
+	for(rd_inv=0;rd_inv<344;rd_inv=rd_inv+1) begin
+		hex_buffer[rd_inv*8+:8] = hex_buffer_inv[(hex_msb - rd_inv*8)+:8];
+	end
+	hex_data_len = (char2int(hex_buffer[1*8+:8]))*16 + char2int(hex_buffer[2*8+:8]);
+	hex_data_addr = (char2int(hex_buffer[3*8+:8]))*4096 + (char2int(hex_buffer[4*8+:8]))*256 +
+		(char2int(hex_buffer[5*8+:8]))*16 + (char2int(hex_buffer[6*8+:8]))*1;
+	$display("fetch line %s, [0]=%d[1]=%d[2]=%d, len %d, addr %d",hex_buffer,hex_buffer[0*8+:8],hex_buffer[1*8+:8],hex_buffer[2*8+:8],hex_data_len,hex_data_addr);
+	for(cp_cnt=0;cp_cnt<hex_data_len;cp_cnt=cp_cnt+1) begin
+		i1.internal_rom.rom[hex_data_addr+cp_cnt] = hex_buffer[(9+cp_cnt*2)*8-1-:8]*16 +
+			hex_buffer[(10+cp_cnt*2)*8-1-:8];
+		$display("Writing Rom @ 0x%8x, value = 0x%2x",hex_data_addr+cp_cnt,hex_buffer[(9+cp_cnt*2)*8-1-:8]*16 +
+			hex_buffer[(10+cp_cnt*2)*8-1-:8]);   
+	end
+end
+$fclose(fd);
+
 #1 CLK = 1;
 #1 CLK = 0;
 #1 CLK = 1;
