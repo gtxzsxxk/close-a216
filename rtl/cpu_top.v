@@ -50,6 +50,7 @@ irom internal_rom(
 );
 
 iram internal_ram(
+    .CLK(CLK),
     .HRESET(h_reset),
     .HWRITE(HWRITE),
     .HADDR(PADDR),

@@ -1,4 +1,5 @@
 module iram(
+    input CLK,
     input HRESET,
     input HWRITE,
     input [63:0] HADDR,
@@ -13,7 +14,18 @@ reg [7:0] ram[RAM_SIZE-1:0];
 
 integer rst_i;
 
-always @(*) begin
+// reg written = 0;
+
+// always @ (posedge CLK) begin
+//     if(HWRITE) begin
+//         written <= 1;
+//     end
+//     else begin
+//         written <= 0;
+//     end
+// end
+
+always @ (posedge CLK or negedge HRESET) begin
     if(!HRESET) begin
         for(rst_i = 0;rst_i < RAM_SIZE;rst_i = rst_i + 1) begin
             ram[rst_i] <= 0;
@@ -32,20 +44,25 @@ always @(*) begin
                 ram[HADDR-RAM_START + 6] <= HWDATA[55:48];
                 ram[HADDR-RAM_START + 7] <= HWDATA[63:56];
             end
-            HRDATA <= {
-                ram[HADDR-RAM_START + 7],
-                ram[HADDR-RAM_START + 6],
-                ram[HADDR-RAM_START + 5],
-                ram[HADDR-RAM_START + 4],
-                ram[HADDR-RAM_START + 3],
-                ram[HADDR-RAM_START + 2],
-                ram[HADDR-RAM_START + 1],
-                ram[HADDR-RAM_START]
-            };
         end
-        else begin
-            HRDATA <= 64'bz;
-        end
+    end
+end
+
+always @(*) begin
+    if(HADDR >= RAM_START && HADDR <= (RAM_START + RAM_SIZE - 8)) begin
+        HRDATA <= {
+            ram[HADDR-RAM_START + 7],
+            ram[HADDR-RAM_START + 6],
+            ram[HADDR-RAM_START + 5],
+            ram[HADDR-RAM_START + 4],
+            ram[HADDR-RAM_START + 3],
+            ram[HADDR-RAM_START + 2],
+            ram[HADDR-RAM_START + 1],
+            ram[HADDR-RAM_START]
+        };
+    end
+    else begin
+        HRDATA <= 64'bz;
     end
 end
 
