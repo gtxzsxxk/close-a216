@@ -159,7 +159,7 @@ always @ (posedge CLK) begin
         end
         else if(funct3 == 3'b101) begin
             /* BGE */
-            res <= {63'b0, $signed(op1) > $signed(op2)};
+            res <= {63'b0, $signed(op1) >= $signed(op2)};
         end
         else if(funct3 == 3'b110) begin
             /* BLTU */
@@ -167,7 +167,7 @@ always @ (posedge CLK) begin
         end
         else if(funct3 == 3'b111) begin
             /* BGEU */
-            res <= {63'b0, $unsigned(op1) > $unsigned(op2)};
+            res <= {63'b0, $unsigned(op1) >= $unsigned(op2)};
         end
     end
     if(take_branch) begin
