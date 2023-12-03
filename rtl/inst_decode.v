@@ -193,10 +193,19 @@ end
 
 /* 解决连续两拍stall时的问题 */
 
-wire [31:0] neg_inst = (!(stall || stall_raise) && stall_cnt >= 2)
+reg [2:0] bubble_cnt = 0; /* 统计共有几个nop */
+
+wire [31:0] neg_inst = (!(stall || stall_raise) 
+        && stall_cnt >= 2 && bubble_cnt >= 2)
             ? inst_reg : instruction;
 
 always @ (negedge CLK) begin
+    if(instruction == 32'h00000013) begin
+        bubble_cnt <= bubble_cnt + 1;
+    end
+    else begin
+        bubble_cnt <= 0;
+    end
     if(neg_inst[6:0] == ARITHMETIC ||
         neg_inst[6:0] == ARITHMETIC_64) begin
         rd <= neg_inst[11:7];
