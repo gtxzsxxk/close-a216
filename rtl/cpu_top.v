@@ -109,6 +109,7 @@ wire word_inst;
 
 wire [2:0] id_mem_para;
 wire [63:0] id_store_value;
+wire [4:0] id_store_reg;
 
 wire [4:0] alu_rd;
 wire alu_load_flag;
@@ -149,11 +150,13 @@ inst_decode i_d(
     .jalr_offset(jalr_offset),
     .branch_flag(id_branch_flag),
     .PC_o(id_PC),
-    .store_value(id_store_value)
+    .store_value(id_store_value),
+    .store_reg(id_store_reg)
 );
 
 wire [63:0] op1_fwd;
 wire [63:0] op2_fwd;
+wire [63:0] store_value_fwd;
 
 wire [63:0] alu_branch_offset;
 wire alu_branch_flag;
@@ -169,12 +172,15 @@ forward_unit fu(
     .mem_rd(mem_rd),
     .rs1(rs1),
     .rs2(rs2),
+    .store_reg(id_store_reg),
     .alu_res(alu_res),
     .mem_res(mem_res),
     .op1_from_id(op1),
     .op2_from_id(op2),
+    .store_value_from_id(id_store_value),
     .op1_fwd(op1_fwd),
-    .op2_fwd(op2_fwd)
+    .op2_fwd(op2_fwd),
+    .store_value_fwd(store_value_fwd)
 );
 
 alu exec(
@@ -194,7 +200,7 @@ alu exec(
     .branch_flag_i(id_branch_flag),
     .branch_offset_i(id_branch_offset),
     .PC_i(id_PC),
-    .store_value_i(id_store_value),
+    .store_value_i(store_value_fwd),
     // .stall(stall),
     .res(alu_res),
     .alu_write_back_en(alu_write_back_en),

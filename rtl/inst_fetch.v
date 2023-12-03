@@ -18,6 +18,9 @@ parameter JALR = 7'b1100111;
 /* use the address by if or by the outside */
 reg addr_mux = 0;
 
+reg stall_reg = 0;
+reg take_branch_reg = 0;
+
 reg [63:0] PC_tmp;
 reg [63:0] PC_jalr;
 reg jalr_jump = 0;
@@ -43,7 +46,9 @@ always @ (posedge CLK or negedge reset) begin
         addr_mux <= 0;
     end
     else begin
-        if(stall) begin
+        stall_reg <= stall;
+        take_branch_reg <= take_branch;
+        if(stall && !take_branch) begin
             PC_tmp <= get_pc(jalr_jump);
             HTRANS <= 1;
             addr_mux <= 0;
@@ -72,7 +77,7 @@ always @ (posedge CLK or negedge reset) begin
 end
 
 always @ (negedge CLK) begin
-    if(stall) begin
+    if((stall) && !take_branch_reg) begin
         inst <= inst;
     end
     else begin
