@@ -130,6 +130,9 @@ begin
 end
 endfunction
 
+reg [31:0] inst_reg;
+reg [1:0] stall_cnt;
+
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
@@ -143,6 +146,13 @@ always @ (posedge CLK or negedge reset) begin
         end
         registers[0] <= 64'd0;
         registers[3] <= 64'h20200;
+
+        if(stall) begin
+            stall_cnt <= stall_cnt + 1;
+        end
+        else begin
+            stall_cnt <= 0;
+        end
 
         if(inst[6:0] == ARITHMETIC || 
             inst[6:0] == BRANCH ||
@@ -178,73 +188,64 @@ always @ (posedge CLK or negedge reset) begin
         end
         PC_o <= PC_i;
     end
+    inst_reg <= inst;
 end
 
 /* 解决连续两拍stall时的问题 */
-function [31:0] get_inst_neg;
-input cur_stall_flag;
-begin
-    if(!cur_stall_flag) begin
-        get_inst_neg = inst;
-    end
-    else begin
-        get_inst_neg = instruction;
-    end
-end
-endfunction
 
-wire [31:0] neg_inst = get_inst_neg(stall);
+wire [31:0] neg_inst = (!(stall || stall_raise) && stall_cnt >= 2)
+            ? inst_reg : instruction;
 
 always @ (negedge CLK) begin
-    if(instruction[6:0] == ARITHMETIC ||
-        instruction[6:0] == ARITHMETIC_64) begin
-        rd <= instruction[11:7];
-        funct3 <= instruction[14:12];
-        rs1 <= instruction[19:15];
-        rs2 <= instruction[24:20];
-        funct7 <= instruction[31:25];
-        op1 <= get_register_value(instruction[19:15]);
-        op2 <= get_register_value(instruction[24:20]);
+    if(neg_inst[6:0] == ARITHMETIC ||
+        neg_inst[6:0] == ARITHMETIC_64) begin
+        rd <= neg_inst[11:7];
+        funct3 <= neg_inst[14:12];
+        rs1 <= neg_inst[19:15];
+        rs2 <= neg_inst[24:20];
+        funct7 <= neg_inst[31:25];
+        op1 <= get_register_value(neg_inst[19:15]);
+        op2 <= get_register_value(neg_inst[24:20]);
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= instruction[6:0] == ARITHMETIC_64;
+        word_inst <= neg_inst[6:0] == ARITHMETIC_64;
         mem_para <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == ARITHMETIC_IMM ||
-        instruction[6:0] == ARITHMETIC_IMM_64) begin
-        rd <= instruction[11:7];
-        funct3 <= instruction[14:12];
-        rs1 <= instruction[19:15];
+    else if(neg_inst[6:0] == ARITHMETIC_IMM ||
+        neg_inst[6:0] == ARITHMETIC_IMM_64) begin
+        rd <= neg_inst[11:7];
+        funct3 <= neg_inst[14:12];
+        rs1 <= neg_inst[19:15];
         /* set rs1 rs2 to avoid forwarding unit */
         rs2 <= 0;
-        imm20 <= instruction[31:20];
-        op1 <= get_register_value(instruction[19:15]);
-        op2 <= {{(52){instruction[31]}},instruction[31:20]};
+        imm20 <= neg_inst[31:20];
+        op1 <= get_register_value(neg_inst[19:15]);
+        op2 <= {{(52){neg_inst[31]}},neg_inst[31:20]};
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 1;
         branch_flag <= 0;
-        word_inst <= instruction[6:0] == ARITHMETIC_IMM_64;
+        word_inst <= neg_inst[6:0] == ARITHMETIC_IMM_64;
         mem_para <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == LOAD) begin
-        rd <= instruction[11:7];
+    else if(neg_inst[6:0] == LOAD) begin
+        rd <= neg_inst[11:7];
         /* let the alu calculate the address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
-        mem_para <= instruction[14:12];
-        rs1 <= instruction[19:15];
+        mem_para <= neg_inst[14:12];
+        rs1 <= neg_inst[19:15];
         /* set rs1 rs2 to avoid forwarding unit */
         rs2 <= 0;
-        imm20 <= instruction[31:20];
-        op1 <= get_register_value(instruction[19:15]);
-        op2 <= {{(52){instruction[31]}},instruction[31:20]};
+        imm20 <= neg_inst[31:20];
+        op1 <= get_register_value(neg_inst[19:15]);
+        op2 <= {{(52){neg_inst[31]}},neg_inst[31:20]};
         mem_acc <= 1;
         load_flag <= 1;
         write_back <= 1;
@@ -253,19 +254,19 @@ always @ (negedge CLK) begin
         word_inst <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == STORE) begin
-        store_value <= get_register_value(instruction[24:20]);
-        store_reg <= instruction[24:20];
+    else if(neg_inst[6:0] == STORE) begin
+        store_value <= get_register_value(neg_inst[24:20]);
+        store_reg <= neg_inst[24:20];
         /* let the alu calculate the address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
-        mem_para <= instruction[14:12];
+        mem_para <= neg_inst[14:12];
         /* avoid forwarding */
         rd <= 0;
-        rs1 <= instruction[19:15];
-        rs2 <= instruction[24:20];
-        op1 <= get_register_value(instruction[19:15]);
-        op2 <= {{(52){instruction[31]}},instruction[31:25],instruction[11:7]};
+        rs1 <= neg_inst[19:15];
+        rs2 <= neg_inst[24:20];
+        op1 <= get_register_value(neg_inst[19:15]);
+        op2 <= {{(52){neg_inst[31]}},neg_inst[31:25],neg_inst[11:7]};
         mem_acc <= 1;
         load_flag <= 0;
         /* above EN and !LOAD is STORE */
@@ -274,16 +275,16 @@ always @ (negedge CLK) begin
         branch_flag <= 0;
         word_inst <= 0;
     end
-    else if(instruction[6:0] == BRANCH) begin
-        branch_offset <= {{(51){instruction[31]}},instruction[31],
-            instruction[7],instruction[30:25],instruction[11:8],1'b0};
-        funct3 <= instruction[14:12];
+    else if(neg_inst[6:0] == BRANCH) begin
+        branch_offset <= {{(51){neg_inst[31]}},neg_inst[31],
+            neg_inst[7],neg_inst[30:25],neg_inst[11:8],1'b0};
+        funct3 <= neg_inst[14:12];
         /* avoid forwarding */
         rd <= 0;
-        rs1 <= instruction[19:15];
-        rs2 <= instruction[24:20];
-        op1 <= get_register_value(instruction[19:15]);
-        op2 <= get_register_value(instruction[24:20]);
+        rs1 <= neg_inst[19:15];
+        rs2 <= neg_inst[24:20];
+        op1 <= get_register_value(neg_inst[19:15]);
+        op2 <= get_register_value(neg_inst[24:20]);
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 0;
@@ -293,8 +294,8 @@ always @ (negedge CLK) begin
         mem_para <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == JAL) begin
-        rd <= instruction[11:7];
+    else if(neg_inst[6:0] == JAL) begin
+        rd <= neg_inst[11:7];
         /* let the alu calculate the address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
@@ -318,8 +319,8 @@ always @ (negedge CLK) begin
         mem_para <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == JALR) begin
-        rd <= instruction[11:7];
+    else if(neg_inst[6:0] == JALR) begin
+        rd <= neg_inst[11:7];
         /* let the alu calculate the PC+4 address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
@@ -338,17 +339,17 @@ always @ (negedge CLK) begin
         word_inst <= 0;
         store_reg <= 0;
     end
-    else if(instruction[6:0] == LUI ||
-            instruction[6:0] == AUIPC) begin
-        rd <= instruction[11:7];
+    else if(neg_inst[6:0] == LUI ||
+            neg_inst[6:0] == AUIPC) begin
+        rd <= neg_inst[11:7];
         /* let the alu calculate the address. 
          * Here funct3 should be add */
         funct3 <= 3'b000;
         /* set rs1 rs2 to avoid forwarding unit */
         rs1 <= 0;
         rs2 <= 0;
-        op1 <= {{(32){instruction[31]}},instruction[31:12],12'b0};
-        op2 <= instruction[6:0] == AUIPC ? PC_o : 0;
+        op1 <= {{(32){neg_inst[31]}},neg_inst[31:12],12'b0};
+        op2 <= neg_inst[6:0] == AUIPC ? PC_o : 0;
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
