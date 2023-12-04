@@ -1,13 +1,13 @@
 module uart_clk_divider(
 	input HRESET,
 	input CLK,
-	input [64:0] baudrate_division,
+	input [63:0] baudrate_division,
 	output reg div_clk
 );
 
-reg [64:0] div_compare;
+reg [63:0] div_compare;
 
-always @ (posegde CLK or negedge HRESET) begin
+always @ (posedge CLK or negedge HRESET) begin
 	if(!HRESET) begin
 		div_clk <= 0;
 		div_compare <= 0;
