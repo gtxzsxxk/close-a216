@@ -24,6 +24,7 @@ module inst_decode(
     output reg imm_flag,
     output reg mem_acc,
     output reg load_flag,
+    output reg load_fwd_flag,
     output reg word_inst, /* work on 32bits */
     output reg stall_raise,
     output reg [63:0] branch_offset,
@@ -83,13 +84,14 @@ endfunction
 
 reg [31:0] instruction = 0;
 
-wire [31:0] inst_two_op = get_inst(inst,stall | judge_stall(instruction[6:0],
+wire [31:0] inst_two_op = get_inst(inst,stall | judge_stall(neg_inst[6:0],
                 inst[19:15], inst[24:20], 0));
 
-wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(instruction[6:0],
+wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(neg_inst[6:0],
                 inst[19:15], 0, 1));
 
-wire [31:0] inst_load = get_inst(inst,stall);
+wire [31:0] inst_load = get_inst(inst,stall | judge_stall(neg_inst[6:0],
+                inst[19:15], 0, 1));
 
 wire [63:0] jalr_target_addr = get_register_value(inst[19:15]) +
                     {{(52){inst[31]}},inst[31:20]};
@@ -131,7 +133,23 @@ end
 endfunction
 
 reg [31:0] inst_reg;
+reg [31:0] last_dispatched_inst; /* 上一条成功发射的指令 */
+reg [31:0] last_nonop_inst; /* 上一条派遣的非空指令 */
+reg [31:0] last_nonop_pc;
 reg [1:0] stall_cnt;
+
+/* 前一个指令是load，这一个指令也是load，且发生冲突时，插入两个气泡 */
+reg [2:0] load_stall_cnt; 
+
+/* 解决连续两拍stall时的问题 */
+
+reg [2:0] bubble_cnt = 0; /* 统计共有几个nop */
+
+wire [31:0] neg_inst = (!(stall || stall_raise) 
+        && stall_cnt >= 1 && bubble_cnt >= 2)
+            ? ((last_nonop_inst!=inst_reg && last_nonop_pc != PC_o)
+                ? inst_reg : instruction)
+            : instruction;
 
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
@@ -139,6 +157,7 @@ always @ (posedge CLK or negedge reset) begin
             registers[rst_i] <= 64'd0;
         end
         stall_raise <= 0;
+        load_stall_cnt <= 0;
     end
     else begin
         if(wb_en && wb_rd != 0) begin
@@ -158,14 +177,14 @@ always @ (posedge CLK or negedge reset) begin
             inst[6:0] == BRANCH ||
             inst[6:0] == ARITHMETIC_64 ||
             inst[6:0] == STORE) begin
-            stall_raise <= judge_stall(instruction[6:0],
+            stall_raise <= judge_stall(neg_inst[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
         end
         else if(inst[6:0] == ARITHMETIC_IMM ||
             inst[6:0] == ARITHMETIC_IMM_64 ||
             inst[6:0] == JALR) begin
-            stall_raise <= judge_stall(instruction[6:0],
+            stall_raise <= judge_stall(neg_inst[6:0],
                 inst[19:15], 0, 1);
             instruction <= inst_imm;
             if(inst[6:0] == JALR) begin
@@ -174,8 +193,23 @@ always @ (posedge CLK or negedge reset) begin
             end
         end
         else if(inst[6:0] == LOAD) begin
-            stall_raise <= 0;
-            instruction <= inst_load;
+            if(judge_stall(neg_inst[6:0],
+                inst[19:15], 0, 1) && load_stall_cnt == 0) begin
+                load_stall_cnt <= 1;
+                stall_raise <= 1;
+                instruction <= 32'h00000013;
+            end
+
+            if(load_stall_cnt > 0) begin
+                load_stall_cnt <= load_stall_cnt - 1;
+                stall_raise <= 1;
+                instruction <= 32'h00000013;
+            end
+            else begin
+                stall_raise <= judge_stall(neg_inst[6:0],
+                    inst[19:15], 0, 1);
+                instruction <= inst_load;
+            end
         end
         else if(inst[6:0] == JAL ||
                 inst[6:0] == LUI ||
@@ -186,18 +220,23 @@ always @ (posedge CLK or negedge reset) begin
         else begin
             instruction <= 32'h00000013;
         end
-        PC_o <= PC_i;
     end
+
+    if(last_dispatched_inst[6:0] == LOAD) begin
+        load_fwd_flag <= 1;
+    end
+    else begin
+        load_fwd_flag <= 0;
+    end
+
+    if(neg_inst != 32'h00000013) begin
+        last_nonop_inst <= neg_inst;
+        last_nonop_pc <= PC_o;
+    end
+
+    PC_o <= PC_i;
     inst_reg <= inst;
 end
-
-/* 解决连续两拍stall时的问题 */
-
-reg [2:0] bubble_cnt = 0; /* 统计共有几个nop */
-
-wire [31:0] neg_inst = (!(stall || stall_raise) 
-        && stall_cnt >= 2 && bubble_cnt >= 2)
-            ? inst_reg : instruction;
 
 always @ (negedge CLK) begin
     if(instruction == 32'h00000013) begin
@@ -206,6 +245,7 @@ always @ (negedge CLK) begin
     else begin
         bubble_cnt <= 0;
     end
+    last_dispatched_inst <= neg_inst;
     if(neg_inst[6:0] == ARITHMETIC ||
         neg_inst[6:0] == ARITHMETIC_64) begin
         rd <= neg_inst[11:7];

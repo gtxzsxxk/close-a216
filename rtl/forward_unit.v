@@ -1,5 +1,6 @@
 module forward_unit(
     input imm,
+    input load_inst, /* 如果上一条指令是load，插入气泡，从mem开始forward */
     input [4:0] alu_rd,
     input [4:0] mem_rd,
     input [4:0] rs1,
@@ -16,7 +17,7 @@ module forward_unit(
 );
 
 always @ (*) begin
-    if(rs1 == alu_rd && alu_rd != 0) begin
+    if(!load_inst && rs1 == alu_rd && alu_rd != 0) begin
         op1_fwd <= alu_res;
     end
     else if(rs1 == mem_rd && mem_rd != 0) begin

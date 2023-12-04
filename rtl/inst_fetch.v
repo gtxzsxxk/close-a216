@@ -8,6 +8,7 @@ module inst_fetch(
     input [63:0] PC_i,
     input [63:0] HRDATA,
     output wire [63:0] HADDR,
+    output reg [63:0] pc_of_inst,
     output reg [31:0] inst,
     output reg HTRANS
 );
@@ -79,9 +80,11 @@ end
 always @ (negedge CLK) begin
     if((stall) && !take_branch_reg) begin
         inst <= inst;
+        pc_of_inst <= pc_of_inst;
     end
     else begin
         inst <= HRDATA;
+        pc_of_inst <= HADDR;
         if(inst[6:0] == JALR) begin
             PC_jalr <= PC_i;
             jalr_jump <= 1;

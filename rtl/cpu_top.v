@@ -58,12 +58,23 @@ iram internal_ram(
     .HRDATA(HRDATA)
 );
 
+uart_top u_controller(
+    .HRESET(h_reset),
+    .CLK(CLK),
+    .HWRITE(HWRITE),
+    .PADDR(PADDR),
+    .PWDATA(PDATA),
+    .PRDATA(HRDATA)
+);
+
 wire take_branch;
 wire [63:0] take_branch_offset;
 
 wire [63:0] mem_PC;
 
 wire [63:0] jalr_offset;
+
+wire [63:0] pc_of_inst;
 
 inst_fetch i_f(
     .CLK(CLK),
@@ -75,6 +86,7 @@ inst_fetch i_f(
     .PC_i(jalr_offset),
     .HRDATA(HRDATA),
     .HADDR(HADDR_1),
+    .pc_of_inst(pc_of_inst),
     .inst(inst),
     .HTRANS(HTRANS_1)
 );
@@ -93,6 +105,7 @@ wire mem_write_back_en;
 wire imm_flag;
 wire mem_acc;
 wire load_flag;
+wire load_fwd_flag;
 wire [63:0] alu_res;
 
 wire [4:0] wb_rd;
@@ -127,7 +140,7 @@ inst_decode i_d(
     .wb_value(wb_value),
     .wb_en(wb_en),
     .stall(id_stall),
-    .PC_i(HADDR_1),
+    .PC_i(pc_of_inst),
     .alu_rd(alu_rd),
     .jalr_forwarding_alu_op1(alu_res),
     .mem_rd(mem_rd),
@@ -145,6 +158,7 @@ inst_decode i_d(
     .imm_flag(imm_flag),
     .mem_acc(mem_acc),
     .load_flag(load_flag),
+    .load_fwd_flag(load_fwd_flag),
     .word_inst(word_inst),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
@@ -169,6 +183,7 @@ wire [63:0] alu_store_value;
 
 forward_unit fu(
     .imm(imm_flag),
+    .load_inst(load_fwd_flag),
     .alu_rd(alu_rd),
     .mem_rd(mem_rd),
     .rs1(rs1),
