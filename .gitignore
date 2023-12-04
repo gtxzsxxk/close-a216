@@ -15,3 +15,5 @@ msim_transcript
 *.qpf
 *.qsf
 cmake-build-*
+greybox_tmp
+.qsys_edit
