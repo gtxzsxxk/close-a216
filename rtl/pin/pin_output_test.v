@@ -13,13 +13,15 @@ parameter PIN_OUT_ADDR = 32'h4001_4800;
 reg [31:0] data_register;
 parameter dr_offset = 32'd0;
 
+wire address_validate = PADDR == PIN_OUT_ADDR + dr_offset;
+
 always @ (posedge CLK or negedge HRESET) begin
 	if(!HRESET) begin
 		data_register <= 0;
 	end
 	else begin
 		if(HWRITE) begin
-			if(PADDR == PIN_OUT_ADDR + dr_offset) begin
+			if(address_validate) begin
 				data_register <= PWDATA;
 			end
 		end
@@ -27,7 +29,7 @@ always @ (posedge CLK or negedge HRESET) begin
 end
 
 always @ (*) begin
-	if(PADDR == PIN_OUT_ADDR + dr_offset) begin
+	if(address_validate) begin
 		PRDATA <= data_register;
 	end
 	else begin

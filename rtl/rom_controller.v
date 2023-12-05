@@ -27,8 +27,17 @@ rom_ip ro_i(
     .q(ip_output)
 );
 
-wire [31:0] output_shifted = ip_output >> addr_offset;
+reg [31:0] output_shifted;
 
 assign HRDATA = addr_validate ? output_shifted : 32'bz;
+
+always @(*) begin
+    case(addr_offset)
+        2'd0: output_shifted <= ip_output;
+        2'd1: output_shifted <= {8'b0,ip_output[31:8]};
+        2'd2: output_shifted <= {16'b0,ip_output[31:16]};
+        2'd3: output_shifted <= {24'b0,ip_output[31:24]};
+    endcase
+end
 
 endmodule
