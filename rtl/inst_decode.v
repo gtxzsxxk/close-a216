@@ -164,7 +164,7 @@ always @ (posedge CLK or negedge reset) begin
         registers[3] <= 32'h20200;
 
         if(stall) begin
-            stall_cnt <= stall_cnt + 1;
+            stall_cnt <= stall_cnt + 2'd1;
         end
         else begin
             stall_cnt <= 0;
@@ -190,13 +190,13 @@ always @ (posedge CLK or negedge reset) begin
         else if(inst[6:0] == LOAD) begin
             if(judge_stall(neg_inst[6:0],
                 inst[19:15], 0, 1) && load_stall_cnt == 0) begin
-                load_stall_cnt <= 1;
+                load_stall_cnt <= 3'd1;
                 stall_raise <= 1;
                 instruction <= 32'h00000013;
             end
 
             if(load_stall_cnt > 0) begin
-                load_stall_cnt <= load_stall_cnt - 1;
+                load_stall_cnt <= load_stall_cnt - 3'd1;
                 stall_raise <= 1;
                 instruction <= 32'h00000013;
             end

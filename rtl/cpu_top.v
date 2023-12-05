@@ -8,7 +8,7 @@ module cpu_top(
 reg reset_flag = 1;
 reg clk_bin_div;
 parameter clk_bin_div_cmp = 1;
-reg clk_bin_div_cnt;
+reg [1:0] clk_bin_div_cnt;
 
 wire HTRANS_1;
 wire HTRANS_2;
@@ -295,7 +295,7 @@ always @ (posedge CLK) begin
             clk_bin_div = ~clk_bin_div;
         end
         else begin
-            clk_bin_div_cnt <= clk_bin_div_cnt + 1;
+            clk_bin_div_cnt <= clk_bin_div_cnt + 2'd1;
         end
     end
 end

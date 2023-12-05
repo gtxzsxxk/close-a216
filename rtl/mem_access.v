@@ -110,7 +110,7 @@ always @ (negedge CLK) begin
         else begin
             if(mem_para_local == 3'b000) begin
                 /* SB */
-                case(addr_offset) begin
+                case(addr_offset)
                     2'd0: HWDATA <= (HRDATA & (~32'hff)) | (tmp_res & 32'hff);
                     2'd1: begin
                         HWDATA <= (HRDATA & (~32'hff00)) |
@@ -124,18 +124,18 @@ always @ (negedge CLK) begin
                         HWDATA <= (HRDATA & (~32'hff00_0000)) |
                             {tmp_res[7:0],24'b0}; 
                     end
-                end
+                endcase
             
             end
             else if(mem_para_local == 3'b001) begin
                 /* SH */
-                case(addr_offset) begin
+                case(addr_offset)
                     2'd0: HWDATA <= (HRDATA & (~32'hffff)) | (tmp_res & 32'hffff);
                     2'd2: begin
                         HWDATA <= (HRDATA & (~32'hffff_0000)) |
                             {tmp_res[15:0],16'b0}; 
                     end
-                end
+                endcase
             end
             else if(mem_para_local == 3'b010) begin
                 /* SW */
