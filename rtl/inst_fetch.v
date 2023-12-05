@@ -3,12 +3,12 @@ module inst_fetch(
     input reset,
     input stall,
     input take_branch,
-    input [63:0] branch_PC,
-    input [63:0] take_branch_offset,
-    input [63:0] PC_i,
-    input [63:0] HRDATA,
-    output wire [63:0] HADDR,
-    output reg [63:0] pc_of_inst,
+    input [31:0] branch_PC,
+    input [31:0] take_branch_offset,
+    input [31:0] PC_i,
+    input [31:0] HRDATA,
+    output wire [31:0] HADDR,
+    output reg [31:0] pc_of_inst,
     output reg [31:0] inst,
     output reg HTRANS
 );
@@ -19,16 +19,15 @@ parameter JALR = 7'b1100111;
 /* use the address by if or by the outside */
 reg addr_mux = 0;
 
-reg stall_reg = 0;
 reg take_branch_reg = 0;
 
-reg [63:0] PC_tmp;
-reg [63:0] PC_jalr;
+reg [31:0] PC_tmp;
+reg [31:0] PC_jalr;
 reg jalr_jump = 0;
 
 assign HADDR = addr_mux ? PC_i : PC_tmp;
 
-function [63:0] get_pc;
+function [31:0] get_pc;
     input use_jalr_pc;
     begin
         if(use_jalr_pc) begin
@@ -47,7 +46,6 @@ always @ (posedge CLK or negedge reset) begin
         addr_mux <= 0;
     end
     else begin
-        stall_reg <= stall;
         take_branch_reg <= take_branch;
         if(stall && !take_branch) begin
             PC_tmp <= get_pc(jalr_jump);
@@ -61,7 +59,7 @@ always @ (posedge CLK or negedge reset) begin
             end
             else if(inst[6:0] == JAL) begin
                 /* if the last instruction is JALx, jump now */
-                PC_tmp <= get_pc(jalr_jump) + {{(43){inst[31]}},inst[31],inst[19:12],
+                PC_tmp <= get_pc(jalr_jump) + {{(11){inst[31]}},inst[31],inst[19:12],
                     inst[20],inst[30:21],1'b0};
                 addr_mux <= 0;
             end

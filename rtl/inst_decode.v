@@ -3,14 +3,14 @@ module inst_decode(
     input reset,
     input [31:0] inst,
     input [4:0] wb_rd,
-    input [63:0] wb_value,
+    input [31:0] wb_value,
     input wb_en,
     input stall,
-    input [63:0] PC_i,
+    input [31:0] PC_i,
     input [4:0] alu_rd,
-    input [63:0] jalr_forwarding_alu_op1, /* connect with alu res */
+    input [31:0] jalr_forwarding_alu_op1, /* connect with alu res */
     input [4:0] mem_rd,
-    input [63:0] jalr_forwarding_mem_op1, /* connect with mem res */
+    input [31:0] jalr_forwarding_mem_op1, /* connect with mem res */
     output reg [4:0] rd,
     output reg [4:0] rs1,
     output reg [4:0] rs2,
@@ -18,27 +18,24 @@ module inst_decode(
     output reg [2:0] mem_para,
     output reg [6:0] funct7,
     output reg [19:0] imm20,
-    output reg [63:0] op1,
-    output reg [63:0] op2,
+    output reg [31:0] op1,
+    output reg [31:0] op2,
     output reg write_back,
     output reg imm_flag,
     output reg mem_acc,
     output reg load_flag,
     output reg load_fwd_flag,
-    output reg word_inst, /* work on 32bits */
     output reg stall_raise,
-    output reg [63:0] branch_offset,
-    output reg [63:0] jalr_offset,
+    output reg [31:0] branch_offset,
+    output reg [31:0] jalr_offset,
     output reg branch_flag,
-    output reg [63:0] PC_o,
-    output reg [63:0] store_value,
+    output reg [31:0] PC_o,
+    output reg [31:0] store_value,
     output reg [4:0] store_reg
 );
 
 parameter ARITHMETIC = 7'b0110011;
-parameter ARITHMETIC_64 = 7'b0111011;
 parameter ARITHMETIC_IMM = 7'b0010011;
-parameter ARITHMETIC_IMM_64 = 7'b0011011;
 parameter LOAD = 7'b0000011;
 parameter BRANCH = 7'b1100011;
 parameter STORE = 7'b0100011;
@@ -47,11 +44,11 @@ parameter JALR = 7'b1100111;
 parameter LUI = 7'b0110111;
 parameter AUIPC = 7'b0010111;
 
-reg [63:0] registers[31:0];
+reg [31:0] registers[31:0];
 
 integer rst_i;
 
-function [63:0] get_register_value;
+function [31:0] get_register_value;
 input [4:0] idx;
 begin
     if(idx == wb_rd && wb_en && idx != 0) begin
@@ -93,8 +90,8 @@ wire [31:0] inst_imm = get_inst(inst,stall | judge_stall(neg_inst[6:0],
 wire [31:0] inst_load = get_inst(inst,stall | judge_stall(neg_inst[6:0],
                 inst[19:15], 0, 1));
 
-wire [63:0] jalr_target_addr = get_register_value(inst[19:15]) +
-                    {{(52){inst[31]}},inst[31:20]};
+wire [31:0] jalr_target_addr = get_register_value(inst[19:15]) +
+                    {{(20){inst[31]}},inst[31:20]};
 
 
 /* judge whether to stall for the last load */
@@ -154,7 +151,7 @@ wire [31:0] neg_inst = (!(stall || stall_raise)
 always @ (posedge CLK or negedge reset) begin
     if(!reset) begin
         for(rst_i = 0;rst_i<32;rst_i=rst_i+1) begin
-            registers[rst_i] <= 64'd0;
+            registers[rst_i] <= 32'd0;
         end
         stall_raise <= 0;
         load_stall_cnt <= 0;
@@ -163,8 +160,8 @@ always @ (posedge CLK or negedge reset) begin
         if(wb_en && wb_rd != 0) begin
             registers[wb_rd] <= wb_value;
         end
-        registers[0] <= 64'd0;
-        registers[3] <= 64'h20200;
+        registers[0] <= 32'd0;
+        registers[3] <= 32'h20200;
 
         if(stall) begin
             stall_cnt <= stall_cnt + 1;
@@ -175,21 +172,19 @@ always @ (posedge CLK or negedge reset) begin
 
         if(inst[6:0] == ARITHMETIC || 
             inst[6:0] == BRANCH ||
-            inst[6:0] == ARITHMETIC_64 ||
             inst[6:0] == STORE) begin
             stall_raise <= judge_stall(neg_inst[6:0],
                 inst[19:15], inst[24:20], 0);
             instruction <= inst_two_op;
         end
         else if(inst[6:0] == ARITHMETIC_IMM ||
-            inst[6:0] == ARITHMETIC_IMM_64 ||
             inst[6:0] == JALR) begin
             stall_raise <= judge_stall(neg_inst[6:0],
                 inst[19:15], 0, 1);
             instruction <= inst_imm;
             if(inst[6:0] == JALR) begin
                 /* immediately compute the address to jump */
-                jalr_offset <= {jalr_target_addr[63:1], 1'b0};
+                jalr_offset <= {jalr_target_addr[31:1], 1'b0};
             end
         end
         else if(inst[6:0] == LOAD) begin
@@ -220,22 +215,22 @@ always @ (posedge CLK or negedge reset) begin
         else begin
             instruction <= 32'h00000013;
         end
-    end
 
-    if(last_dispatched_inst[6:0] == LOAD) begin
-        load_fwd_flag <= 1;
-    end
-    else begin
-        load_fwd_flag <= 0;
-    end
+        if(last_dispatched_inst[6:0] == LOAD) begin
+            load_fwd_flag <= 1;
+        end
+        else begin
+            load_fwd_flag <= 0;
+        end
 
-    if(neg_inst != 32'h00000013) begin
-        last_nonop_inst <= neg_inst;
-        last_nonop_pc <= PC_o;
-    end
+        if(neg_inst != 32'h00000013) begin
+            last_nonop_inst <= neg_inst;
+            last_nonop_pc <= PC_o;
+        end
 
-    PC_o <= PC_i;
-    inst_reg <= inst;
+        PC_o <= PC_i;
+        inst_reg <= inst;
+    end
 end
 
 always @ (negedge CLK) begin
@@ -246,8 +241,7 @@ always @ (negedge CLK) begin
         bubble_cnt <= 0;
     end
     last_dispatched_inst <= neg_inst;
-    if(neg_inst[6:0] == ARITHMETIC ||
-        neg_inst[6:0] == ARITHMETIC_64) begin
+    if(neg_inst[6:0] == ARITHMETIC) begin
         rd <= neg_inst[11:7];
         funct3 <= neg_inst[14:12];
         rs1 <= neg_inst[19:15];
@@ -260,12 +254,10 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= neg_inst[6:0] == ARITHMETIC_64;
         mem_para <= 0;
         store_reg <= 0;
     end
-    else if(neg_inst[6:0] == ARITHMETIC_IMM ||
-        neg_inst[6:0] == ARITHMETIC_IMM_64) begin
+    else if(neg_inst[6:0] == ARITHMETIC_IMM) begin
         rd <= neg_inst[11:7];
         funct3 <= neg_inst[14:12];
         rs1 <= neg_inst[19:15];
@@ -273,13 +265,12 @@ always @ (negedge CLK) begin
         rs2 <= 0;
         imm20 <= neg_inst[31:20];
         op1 <= get_register_value(neg_inst[19:15]);
-        op2 <= {{(52){neg_inst[31]}},neg_inst[31:20]};
+        op2 <= {{(20){neg_inst[31]}},neg_inst[31:20]};
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 1;
         branch_flag <= 0;
-        word_inst <= neg_inst[6:0] == ARITHMETIC_IMM_64;
         mem_para <= 0;
         store_reg <= 0;
     end
@@ -294,13 +285,12 @@ always @ (negedge CLK) begin
         rs2 <= 0;
         imm20 <= neg_inst[31:20];
         op1 <= get_register_value(neg_inst[19:15]);
-        op2 <= {{(52){neg_inst[31]}},neg_inst[31:20]};
+        op2 <= {{(20){neg_inst[31]}},neg_inst[31:20]};
         mem_acc <= 1;
         load_flag <= 1;
         write_back <= 1;
         imm_flag <= 1;
         branch_flag <= 0;
-        word_inst <= 0;
         store_reg <= 0;
     end
     else if(neg_inst[6:0] == STORE) begin
@@ -315,17 +305,16 @@ always @ (negedge CLK) begin
         rs1 <= neg_inst[19:15];
         rs2 <= neg_inst[24:20];
         op1 <= get_register_value(neg_inst[19:15]);
-        op2 <= {{(52){neg_inst[31]}},neg_inst[31:25],neg_inst[11:7]};
+        op2 <= {{(20){neg_inst[31]}},neg_inst[31:25],neg_inst[11:7]};
         mem_acc <= 1;
         load_flag <= 0;
         /* above EN and !LOAD is STORE */
         write_back <= 0;
         imm_flag <= 1;
         branch_flag <= 0;
-        word_inst <= 0;
     end
     else if(neg_inst[6:0] == BRANCH) begin
-        branch_offset <= {{(51){neg_inst[31]}},neg_inst[31],
+        branch_offset <= {{(19){neg_inst[31]}},neg_inst[31],
             neg_inst[7],neg_inst[30:25],neg_inst[11:8],1'b0};
         funct3 <= neg_inst[14:12];
         /* avoid forwarding */
@@ -339,7 +328,6 @@ always @ (negedge CLK) begin
         write_back <= 0;
         imm_flag <= 0;
         branch_flag <= 1;
-        word_inst <= 0;
         mem_para <= 0;
         store_reg <= 0;
     end
@@ -350,7 +338,7 @@ always @ (negedge CLK) begin
         funct3 <= 3'b000;
         /* use alu to calc rd */
         op1 <= PC_o;
-        op2 <= 64'h4;
+        op2 <= 32'h4;
         /* Here the decoder only cares about write back the rd
          * jump will be impl in inst fetch
          */
@@ -364,7 +352,6 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= 0;
         mem_para <= 0;
         store_reg <= 0;
     end
@@ -374,7 +361,7 @@ always @ (negedge CLK) begin
          * Here funct3 should be add */
         funct3 <= 3'b000;
         op1 <= PC_o;
-        op2 <= 64'h4;
+        op2 <= 32'h4;
 
         /* set rs1 rs2 to avoid forwarding unit */
         rs1 <= 0;
@@ -385,7 +372,6 @@ always @ (negedge CLK) begin
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= 0;
         store_reg <= 0;
     end
     else if(neg_inst[6:0] == LUI ||
@@ -397,14 +383,13 @@ always @ (negedge CLK) begin
         /* set rs1 rs2 to avoid forwarding unit */
         rs1 <= 0;
         rs2 <= 0;
-        op1 <= {{(32){neg_inst[31]}},neg_inst[31:12],12'b0};
+        op1 <= {neg_inst[31:12],12'b0};
         op2 <= neg_inst[6:0] == AUIPC ? PC_o : 0;
         mem_acc <= 0;
         load_flag <= 0;
         write_back <= 1;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= 0;
         store_reg <= 0;
     end
     else begin
@@ -418,7 +403,6 @@ always @ (negedge CLK) begin
         write_back <= 0;
         imm_flag <= 0;
         branch_flag <= 0;
-        word_inst <= 0;
         mem_para <= 0;
         store_reg <= 0;
     end

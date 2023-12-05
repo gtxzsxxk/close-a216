@@ -2,20 +2,20 @@ module uart_top(
 	input HRESET,
 	input CLK,
 	input HWRITE,
-	input [63:0] PADDR,
-	input [63:0] PWDATA,
+	input [31:0] PADDR,
+	input [31:0] PWDATA,
 	input PIN_RX,
-	output reg [63:0] PRDATA,
+	output reg [31:0] PRDATA,
 	output reg PIN_TX
 );
 
-parameter UART_ADDR = 64'h4001_3800;
+parameter UART_ADDR = 32'h4001_3800;
 
-reg [63:0] status_register;
-parameter sr_offset = 64'd0;
+reg [31:0] status_register;
+parameter sr_offset = 32'd0;
 
-reg [63:0] tx_data_register;
-reg [63:0] tx_shift_register;
+reg [31:0] tx_data_register;
+reg [31:0] tx_shift_register;
 reg [7:0] tx_shift_mask;
 reg tx_start_transmit;
 reg tx_frame;
@@ -25,12 +25,12 @@ reg tx_raise_tc;
 
 reg clear_tc_read_sr;
 
-reg [63:0] rx_data_register;
+reg [31:0] rx_data_register;
 reg [7:0] rx_shift_mask;
-parameter dr_offset = 64'd8;
+parameter dr_offset = 32'd4;
 
-reg [63:0] baudrate_division;
-parameter brr_offset = 64'd16;
+reg [31:0] baudrate_division;
+parameter brr_offset = 32'd8;
 
 wire div_clk;
 
@@ -47,8 +47,7 @@ always @ (posedge CLK or negedge HRESET) begin
 		tx_data_register <= 0;
 		tx_start_transmit <= 0;
 		rx_data_register <= 0;
-		baudrate_division <= 64'd434; /* 默认115200 */
-		clear_tc_read_sr <= 0;
+		baudrate_division <= 32'd434; /* 默认115200 */
 	end
 	else begin
 		if(HWRITE) begin
@@ -71,22 +70,25 @@ always @ (posedge CLK or negedge HRESET) begin
 
 		if(HWRITE && PADDR == UART_ADDR + dr_offset) begin
 			/* 写入时清零 */
-			status_register <= (status_register & 64'b0111_1111) &
-				(clear_tc_read_sr ? (64'b1011_1111) :
-				(64'b1111_1111));
+			status_register <= (status_register & 32'b0111_1111) &
+				(clear_tc_read_sr ? (32'b1011_1111) :
+				(32'b1111_1111));
 		end
 		else begin
 			if(tx_raise_txe) begin
 				tx_data_register <= tx_shift_register;
 			end
 			status_register <= status_register |
-				((tx_raise_txe ? 64'b1000_0000 : 64'b0) |
-				(tx_raise_tc ? 64'b0100_0000 : 64'b0));
+				((tx_raise_txe ? 32'b1000_0000 : 32'b0) |
+				(tx_raise_tc ? 32'b0100_0000 : 32'b0));
 		end
 	end
 end
 
 always @ (*) begin
+	if(!HRESET) begin
+		clear_tc_read_sr <= 0;
+	end
 	if(PADDR == UART_ADDR + sr_offset) begin
 		PRDATA <= status_register;
 		clear_tc_read_sr <= 1;
@@ -98,7 +100,7 @@ always @ (*) begin
 		PRDATA <= baudrate_division;
 	end
 	else begin
-		PRDATA <= 64'bz;
+		PRDATA <= 32'bz;
 	end
 end
 

@@ -6,14 +6,14 @@ module forward_unit(
     input [4:0] rs1,
     input [4:0] rs2,
     input [4:0] store_reg,
-    input [63:0] alu_res,
-    input [63:0] mem_res,
-    input [63:0] op1_from_id,
-    input [63:0] op2_from_id,
-    input [63:0] store_value_from_id,
-    output reg [63:0] op1_fwd,
-    output reg [63:0] op2_fwd,
-    output reg [63:0] store_value_fwd
+    input [31:0] alu_res,
+    input [31:0] mem_res,
+    input [31:0] op1_from_id,
+    input [31:0] op2_from_id,
+    input [31:0] store_value_from_id,
+    output reg [31:0] op1_fwd,
+    output reg [31:0] op2_fwd,
+    output reg [31:0] store_value_fwd
 );
 
 always @ (*) begin

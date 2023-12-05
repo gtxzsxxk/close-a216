@@ -1,9 +1,9 @@
 module write_back(
     input EN,
     input [4:0] rd,
-    input [63:0] value,
+    input [31:0] value,
     output [4:0] wb_rd,
-    output [63:0] wb_value,
+    output [31:0] wb_value,
     output wb_en
 );
 
