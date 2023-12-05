@@ -17,3 +17,4 @@ msim_transcript
 cmake-build-*
 greybox_tmp
 .qsys_edit
+*.ver

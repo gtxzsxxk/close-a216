@@ -1,21 +1,27 @@
 module cpu_top(
     input CLK,
-    input RESET
+    input UART_RX,
+    output UART_TX,
+    output PIN_TEST
 );
 
+reg reset_flag = 1;
+reg clk_bin_div;
+parameter clk_bin_div_cmp = 1;
+reg clk_bin_div_cnt;
 
 wire HTRANS_1;
 wire HTRANS_2;
-wire [63:0] HADDR_1;
-wire [63:0] HADDR_2;
+wire [31:0] HADDR_1;
+wire [31:0] HADDR_2;
 wire HWRITE_1 = 0;
 wire HWRITE_2;
-wire [63:0] HWDATA_1;
-wire [63:0] HWDATA_2;
-wire [63:0] PADDR;
+wire [31:0] HWDATA_1 = 0;
+wire [31:0] HWDATA_2;
+wire [31:0] PADDR;
 wire HWRITE;
-wire [63:0] PDATA;
-wire [63:0] HRDATA;
+wire [31:0] PDATA;
+wire [31:0] HRDATA;
 wire stall_from_pc_and_mem;
 wire stall_from_load;
 wire stall;
@@ -43,15 +49,16 @@ mem_controller mc(
     .HRESET_o(h_reset)
 );
 
-irom internal_rom(
+rom_controller irom(
+    .CLK(CLK),
+    .clk_bin_div(clk_bin_div),
     .HADDR(PADDR),
-    .HWDATA(PDATA),
     .HRDATA(HRDATA)
 );
 
-iram internal_ram(
+ram_controller iram(
     .CLK(CLK),
-    .HRESET(h_reset),
+    .clk_bin_div(clk_bin_div),
     .HWRITE(HWRITE),
     .HADDR(PADDR),
     .HWDATA(PDATA),
@@ -60,24 +67,36 @@ iram internal_ram(
 
 uart_top u_controller(
     .HRESET(h_reset),
-    .CLK(CLK),
+    .CLK(clk_bin_div),
     .HWRITE(HWRITE),
     .PADDR(PADDR),
     .PWDATA(PDATA),
-    .PRDATA(HRDATA)
+    .PRDATA(HRDATA),
+    .PIN_RX(UART_RX),
+    .PIN_TX(UART_TX)
+);
+
+pin_output_test pot(
+    .HRESET(h_reset),
+    .CLK(clk_bin_div),
+    .HWRITE(HWRITE),
+    .PADDR(PADDR),
+    .PWDATA(PDATA),
+    .PRDATA(HRDATA),
+    .PIN_OUT(PIN_TEST)
 );
 
 wire take_branch;
-wire [63:0] take_branch_offset;
+wire [31:0] take_branch_offset;
 
-wire [63:0] mem_PC;
+wire [31:0] mem_PC;
 
-wire [63:0] jalr_offset;
+wire [31:0] jalr_offset;
 
-wire [63:0] pc_of_inst;
+wire [31:0] pc_of_inst;
 
 inst_fetch i_f(
-    .CLK(CLK),
+    .CLK(clk_bin_div),
     .reset(if_reset),
     .stall(stall),
     .take_branch(take_branch),
@@ -97,8 +116,8 @@ wire [4:0] rs2;
 wire [2:0] funct3;
 wire [6:0] funct7;
 wire [19:0] imm20;
-wire [63:0] op1;
-wire [63:0] op2;
+wire [31:0] op1;
+wire [31:0] op2;
 wire id_write_back_en;
 wire alu_write_back_en;
 wire mem_write_back_en;
@@ -106,23 +125,21 @@ wire imm_flag;
 wire mem_acc;
 wire load_flag;
 wire load_fwd_flag;
-wire [63:0] alu_res;
+wire [31:0] alu_res;
 
 wire [4:0] wb_rd;
-wire [63:0] wb_value;
+wire [31:0] wb_value;
 wire wb_en;
 
-wire [63:0] id_branch_offset;
+wire [31:0] id_branch_offset;
 wire id_branch_flag;
 
 wire id_stall = stall_from_pc_and_mem | take_branch;
 
-wire [63:0] id_PC;
-
-wire word_inst;
+wire [31:0] id_PC;
 
 wire [2:0] id_mem_para;
-wire [63:0] id_store_value;
+wire [31:0] id_store_value;
 wire [4:0] id_store_reg;
 
 wire [4:0] alu_rd;
@@ -130,10 +147,10 @@ wire alu_load_flag;
 wire alu_mem_en_flag;
 
 wire [4:0] mem_rd;
-wire [63:0] mem_res;
+wire [31:0] mem_res;
 
 inst_decode i_d(
-    .CLK(CLK),
+    .CLK(clk_bin_div),
     .reset(if_reset),
     .inst(inst),
     .wb_rd(wb_rd),
@@ -159,7 +176,6 @@ inst_decode i_d(
     .mem_acc(mem_acc),
     .load_flag(load_flag),
     .load_fwd_flag(load_fwd_flag),
-    .word_inst(word_inst),
     .stall_raise(stall_from_load),
     .branch_offset(id_branch_offset),
     .jalr_offset(jalr_offset),
@@ -169,17 +185,17 @@ inst_decode i_d(
     .store_reg(id_store_reg)
 );
 
-wire [63:0] op1_fwd;
-wire [63:0] op2_fwd;
-wire [63:0] store_value_fwd;
+wire [31:0] op1_fwd;
+wire [31:0] op2_fwd;
+wire [31:0] store_value_fwd;
 
-wire [63:0] alu_branch_offset;
+wire [31:0] alu_branch_offset;
 wire alu_branch_flag;
 
-wire [63:0] alu_PC;
+wire [31:0] alu_PC;
 
 wire [2:0] alu_mem_para;
-wire [63:0] alu_store_value;
+wire [31:0] alu_store_value;
 
 forward_unit fu(
     .imm(imm_flag),
@@ -200,7 +216,7 @@ forward_unit fu(
 );
 
 alu exec(
-    .CLK(CLK),
+    .CLK(clk_bin_div),
     .imm(imm_flag),
     .rd_i(rd),
     .op1(op1_fwd),
@@ -211,7 +227,6 @@ alu exec(
     .write_back(id_write_back_en),
     .load_flag_i(load_flag),
     .mem_en_i(mem_acc),
-    .word_inst(word_inst),
     .take_branch(take_branch),
     .branch_flag_i(id_branch_flag),
     .branch_offset_i(id_branch_offset),
@@ -231,7 +246,7 @@ alu exec(
 );
 
 mem_access m_a(
-    .CLK(CLK),
+    .CLK(clk_bin_div),
     .EN(alu_mem_en_flag),
     .RESET(if_reset),
     .rd_i(alu_rd),
@@ -267,12 +282,21 @@ write_back w_b(
     .wb_en(wb_en)
 );
 
-always @ (posedge CLK or negedge RESET) begin
-    if(!RESET) begin
+always @ (posedge CLK) begin
+    if(reset_flag) begin
         if_reset <= 0;
+        reset_flag <= 0;
+        clk_bin_div <= 1;
+        clk_bin_div_cnt <= 1;
     end
     else begin
         if_reset <= 1;
+        if(clk_bin_div_cnt == clk_bin_div_cmp) begin
+            clk_bin_div = ~clk_bin_div;
+        end
+        else begin
+            clk_bin_div_cnt <= clk_bin_div_cnt + 1;
+        end
     end
 end
 
